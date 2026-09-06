@@ -57,6 +57,10 @@ struct ProfileView: View {
                         .font(.system(size: 13, weight: .medium))
                     Text("No sign-up and no analytics. Barcode numbers are sent to Open Food Facts when you look up a product; your diary and body details are not sent.")
                         .font(.system(size: 12)).foregroundStyle(Color.muted).lineSpacing(3)
+                    Link("Privacy policy ↗", destination: URL(string: "https://github.com/bond-is-here/nibble/blob/main/PRIVACY.md")!)
+                        .font(.system(size: 13, weight: .medium))
+                    Link("Help & support ↗", destination: URL(string: "https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md")!)
+                        .font(.system(size: 13, weight: .medium))
                     DisclosureGroup("About targets & food data") {
                         VStack(alignment: .leading, spacing: 13) {
                             Text("Estimated targets use Mifflin–St Jeor resting energy × your activity level. Losing slowly subtracts up to 300 calories (at most 15%); gaining adds 250. Automated estimates have a 1,500-calorie floor. This is a product guardrail, not a personal medical minimum.")

@@ -14,11 +14,14 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Verify App Store SDK requirement
         run: |
           xcodebuild -version
           sdk_version=$(xcrun --sdk iphoneos --show-sdk-version)
+          echo "iPhone SDK: $sdk_version"
           test "${sdk_version%%.*}" -ge 26
       - name: Check diary, nutrition, barcode, and shared SwiftUI
         run: bash Tools/check.sh
