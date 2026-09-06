@@ -1,0 +1,272 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10100010000000000000001 /* CalorieCompassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000001 /* CalorieCompassApp.swift */; };
+		A10100010000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000002 /* ContentView.swift */; };
+		A10100010000000000000003 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000003 /* Theme.swift */; };
+		A10100010000000000000004 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000004 /* Models.swift */; };
+		A10100010000000000000005 /* NutritionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000005 /* NutritionEngine.swift */; };
+		A10100010000000000000006 /* OpenFoodFactsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000006 /* OpenFoodFactsClient.swift */; };
+		A10100010000000000000007 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000007 /* AppState.swift */; };
+		A10100010000000000000008 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000008 /* OnboardingView.swift */; };
+		A10100010000000000000009 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000009 /* DashboardView.swift */; };
+		A1010001000000000000000A /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1010001000000000000000A /* LogView.swift */; };
+		A1010001000000000000000B /* AddFoodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1010001000000000000000B /* AddFoodView.swift */; };
+		A1010001000000000000000C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1010001000000000000000C /* ProfileView.swift */; };
+		A1010001000000000000000D /* BarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1010001000000000000000D /* BarcodeScannerView.swift */; };
+		A1010001000000000000000E /* Assets in Resources */ = {isa = PBXBuildFile; fileRef = B1010001000000000000000F /* Assets.xcassets */; };
+		A1010001000000000000000F /* Privacy in Resources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000010 /* PrivacyInfo.xcprivacy */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B10100010000000000000001 /* CalorieCompassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieCompassApp.swift; sourceTree = "<group>"; };
+		B10100010000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B10100010000000000000003 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		B10100010000000000000004 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		B10100010000000000000005 /* NutritionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionEngine.swift; sourceTree = "<group>"; };
+		B10100010000000000000006 /* OpenFoodFactsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsClient.swift; sourceTree = "<group>"; };
+		B10100010000000000000007 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		B10100010000000000000008 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		B10100010000000000000009 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		B1010001000000000000000A /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
+		B1010001000000000000000B /* AddFoodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFoodView.swift; sourceTree = "<group>"; };
+		B1010001000000000000000C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		B1010001000000000000000D /* BarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerView.swift; sourceTree = "<group>"; };
+		B1010001000000000000000E /* Nibble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nibble.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1010001000000000000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B10100010000000000000010 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C10100010000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D10100010000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				D10100010000000000000002 /* CalorieCompass */,
+				D10100010000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D10100010000000000000002 /* CalorieCompass */ = {
+			isa = PBXGroup;
+			children = (
+				B10100010000000000000001 /* CalorieCompassApp.swift */,
+				B10100010000000000000002 /* ContentView.swift */,
+				B10100010000000000000003 /* Theme.swift */,
+				B10100010000000000000004 /* Models.swift */,
+				B10100010000000000000005 /* NutritionEngine.swift */,
+				B10100010000000000000006 /* OpenFoodFactsClient.swift */,
+				B10100010000000000000007 /* AppState.swift */,
+				B10100010000000000000008 /* OnboardingView.swift */,
+				B10100010000000000000009 /* DashboardView.swift */,
+				B1010001000000000000000A /* LogView.swift */,
+				B1010001000000000000000B /* AddFoodView.swift */,
+				B1010001000000000000000C /* ProfileView.swift */,
+				B1010001000000000000000D /* BarcodeScannerView.swift */,
+				B1010001000000000000000F /* Assets.xcassets */,
+				B10100010000000000000010 /* PrivacyInfo.xcprivacy */,
+			);
+			path = CalorieCompass;
+			sourceTree = "<group>";
+		};
+		D10100010000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B1010001000000000000000E /* Nibble.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E10100010000000000000001 /* CalorieCompass */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F10100010000000000000002 /* Build configuration list for PBXNativeTarget "Nibble" */;
+			buildPhases = (
+				C10100010000000000000002 /* Sources */,
+				C10100010000000000000001 /* Frameworks */,
+				C10100010000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Nibble;
+			productName = Nibble;
+			productReference = B1010001000000000000000E /* Nibble.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E10100010000000000000002 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = F10100010000000000000001 /* Build configuration list for PBXProject "Nibble" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D10100010000000000000001;
+			productRefGroup = D10100010000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E10100010000000000000001 /* CalorieCompass */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C10100010000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1010001000000000000000E /* Assets in Resources */,
+				A1010001000000000000000F /* Privacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C10100010000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10100010000000000000001 /* CalorieCompassApp.swift in Sources */,
+				A10100010000000000000002 /* ContentView.swift in Sources */,
+				A10100010000000000000003 /* Theme.swift in Sources */,
+				A10100010000000000000004 /* Models.swift in Sources */,
+				A10100010000000000000005 /* NutritionEngine.swift in Sources */,
+				A10100010000000000000006 /* OpenFoodFactsClient.swift in Sources */,
+				A10100010000000000000007 /* AppState.swift in Sources */,
+				A10100010000000000000008 /* OnboardingView.swift in Sources */,
+				A10100010000000000000009 /* DashboardView.swift in Sources */,
+				A1010001000000000000000A /* LogView.swift in Sources */,
+				A1010001000000000000000B /* AddFoodView.swift in Sources */,
+				A1010001000000000000000C /* ProfileView.swift in Sources */,
+				A1010001000000000000000D /* BarcodeScannerView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F10100010000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Nibble;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Nibble uses the camera to read the barcode on a food package.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.caloriecompass.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		F10100010000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Nibble;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Nibble uses the camera to read the barcode on a food package.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.caloriecompass.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		F10100010000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		F10100010000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F10100010000000000000001 /* Build configuration list for PBXProject "Nibble" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F10100010000000000000003 /* Debug */,
+				F10100010000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F10100010000000000000002 /* Build configuration list for PBXNativeTarget "Nibble" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F10100010000000000000005 /* Debug */,
+				F10100010000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E10100010000000000000002 /* Project object */;
+}
