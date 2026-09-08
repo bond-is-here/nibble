@@ -59,7 +59,7 @@ Use the [latest workflow result](https://github.com/bond-is-here/nibble/actions/
 
 ## 4. Listing, screenshots, and submission
 
-- [ ] Review [metadata.md](metadata.md) against the final build. Subtitle: 29 characters; keywords: 88 ASCII bytes; description: 1,839 characters. Confirm name, category Health & Fitness, free pricing, and actual rights-holder copyright.
+- [ ] Review [metadata.md](metadata.md) against the final build. Recheck listing field lengths after edits, including the Macro Mix and no-backup disclosures. Confirm name, category Health & Fitness, free pricing, and actual rights-holder copyright.
 - [ ] Complete the live age-rating questionnaire. Calorie tracking is a Health or Wellness Topic; evaluate Medical or Treatment Information separately. The estimator's adult restriction is not an app-wide age gate, and no final rating is preselected. [Definitions](https://developer.apple.com/help/app-store-connect/reference/app-information/age-ratings-values-and-definitions), [rating setup](https://developer.apple.com/help/app-store-connect/manage-app-information/set-an-app-age-rating).
 - [ ] Rehearse the draft reviewer steps. No login should be needed, and manual entry must work when the live barcode provider fails. Keep estimate limitations and data attribution accessible.
 - [ ] Capture actual iOS screenshots using fictional data and [Apple's required dimensions](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications). Follow the [screenshot plan](metadata.md#screenshot-plan). Do not submit the macOS DEMO/design previews, even if resized.
@@ -130,3 +130,10 @@ Recheck linked requirements at the actual submission date.
 - [x] The first matrix run (`34182133064`) exposed a Debug-only compiler error: Reduce Motion is a read-only environment value. Remove the attempted test override; app behavior continues to read the real system preference. Add a Debug shared-code typecheck so test-only branches are checked locally as well. Re-run both iPhone jobs; no accessibility runtime result exists from this failed build.
 
 Implementation follows Apple's [Dynamic Type guidance](https://developer.apple.com/videos/play/wwdc2024/10074/) and [XCTest accessibility audit guidance](https://developer.apple.com/documentation/accessibility/performing-accessibility-audits-for-your-app). Do not treat implemented support or configured audits as a passed release gate.
+
+## Pending-lookup review
+
+- [x] Cancel in-flight barcode work when switching to manual food entry, opening the camera, editing the typed code, leaving barcode mode, or dismissing the picker. Existing cancellation guards discard late results; a manual label draft must not be replaced by a stale product response.
+- [x] Clarify the portion caption and give the manual-label fallback a 44-point action height. All 1,128 local checks and both shared-code typechecks pass after the change.
+- [ ] Verify the follow-up iPhone run. The existing HTTP fixture suite verifies transport cancellation, but it does not exercise the timing of a manual-form switch during a slow lookup; include that scenario in device QA.
+- [x] Refresh draft store copy to describe Macro Mix and clearly disclose that the diary is not cloud-synced or included in device backups. This remains unpublished draft metadata.

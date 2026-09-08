@@ -54,7 +54,7 @@ struct AddFoodView: View {
                 RoundButton(icon: "xmark", label: "Close scanner", fill: .white) { showScanner = false }.padding(20)
             }.phoneSheet()
         }
-        .onDisappear { lookupTask?.cancel() }
+        .onDisappear { cancelLookup() }
     }
 
     private var main: some View {
@@ -72,7 +72,7 @@ struct AddFoodView: View {
             NibbleAdaptiveStack(spacing: 8) {
                 modeButton("Find a food", icon: "magnifyingglass", value: 0)
                 modeButton("Scan barcode", icon: "barcode", value: 1)
-                Button { showCustom = true } label: {
+                Button(action: beginCustomFood) {
                     Image(systemName: "square.and.pencil").nibbleFont(size: 18).frame(width: 48, height: 48)
                         .background(Color.fog, in: RoundedRectangle(cornerRadius: 15))
                 }.buttonStyle(.plain).accessibilityLabel("Enter calories or create a food")
@@ -89,7 +89,7 @@ struct AddFoodView: View {
         Button {
             mode = value
             message = nil
-            if value == 0 { lookupTask?.cancel(); lookingUp = false }
+            if value == 0 { cancelLookup() }
         } label: {
             HStack(spacing: 7) {
                 Image(systemName: icon)
@@ -132,7 +132,7 @@ struct AddFoodView: View {
                         }.padding(.vertical, 30)
                     }
                     ForEach(foods, id: \.stableKey) { food in foodRow(food) }
-                    Button { showCustom = true } label: {
+                    Button(action: beginCustomFood) {
                         HStack(spacing: 11) {
                             Image(systemName: "plus").frame(width: 42, height: 42).background(Color.lime, in: Circle())
                             VStack(alignment: .leading, spacing: 3) {
@@ -187,14 +187,19 @@ struct AddFoodView: View {
                         Text("The label does the talking.").nibbleFont(size: 13).foregroundStyle(Color.muted)
                     }.padding(.vertical, 35)
                 }
-                NibbleButton(title: "Open camera", icon: "camera") { showScanner = true }
+                NibbleButton(title: "Open camera", icon: "camera") { cancelLookup(); showScanner = true }
                 HStack {
                     Rectangle().fill(Color.line).frame(height: 1)
                     Text("OR TYPE THE BARCODE").nibbleFont(size: 9, weight: .medium, design: .monospaced).fixedSize(horizontal: false, vertical: true)
                     Rectangle().fill(Color.line).frame(height: 1)
                 }.foregroundStyle(Color.muted)
                 HStack(spacing: 10) {
-                    TextField("e.g. 3017620422003", text: $barcode).numericKeyboard().textFieldStyle(.plain).nibbleFont(size: 15)
+                    TextField("e.g. 3017620422003", text: Binding(get: { barcode }, set: { value in
+                        // Only editing cancels. Scanner assignment immediately starts its own lookup.
+                        cancelLookup()
+                        message = nil
+                        barcode = value
+                    })).numericKeyboard().textFieldStyle(.plain).nibbleFont(size: 15)
                         .accessibilityLabel("Barcode number")
                     Button { lookup() } label: {
                         if lookingUp { ProgressView().controlSize(.small) }
@@ -204,15 +209,28 @@ struct AddFoodView: View {
                 }.padding(10).background(Color.white, in: RoundedRectangle(cornerRadius: 18))
                 if let message {
                     InlineMessage(text: message)
-                    Button("Enter the label instead") { showCustom = true }.nibbleFont(size: 13, weight: .semibold).buttonStyle(.plain)
+                    Button("Enter the label instead", action: beginCustomFood).nibbleFont(size: 13, weight: .semibold).buttonStyle(.plain)
+                        .frame(minHeight: 44)
                 }
                 Text("Product data from Open Food Facts. Check it against the package before logging.")
                     .nibbleFont(size: 11).foregroundStyle(Color.muted)
             }
     }
 
-    private func lookup() {
+    private func cancelLookup() {
         lookupTask?.cancel()
+        lookupTask = nil
+        lookingUp = false
+    }
+
+    private func beginCustomFood() {
+        // A late response must not replace a manual label the person is entering.
+        cancelLookup()
+        showCustom = true
+    }
+
+    private func lookup() {
+        cancelLookup()
         lookingUp = true
         message = nil
         let code = barcode
@@ -269,7 +287,7 @@ struct FoodPortionView: View {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(food.name).nibbleFont(size: 27, weight: .bold, design: .rounded).tracking(-0.8)
                         if let brand = food.brand { Text(brand).nibbleFont(size: 12).foregroundStyle(Color.muted) }
-                        Text("Nutrition for \(food.servingText)").nibbleFont(size: 12, weight: .medium)
+                        Text("Label portion: \(food.servingText)").nibbleFont(size: 12, weight: .medium)
                     }
                 }
                 MealSelector(selected: $meal)
