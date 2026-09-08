@@ -394,39 +394,82 @@ struct DiaryChecks {
     private static func favoriteChecks() throws {
         try withFixture { fixture in
             let state = fixture.state()
-            let first = food("Scanned cereal", barcode: "0036000291452", source: .openFoodFacts)
+            let first = food("Scanned cereal", barcode: "036000291452", source: .openFoodFacts)
             var fetchedAgain = food("Renamed cereal", barcode: "0036000291452", source: .openFoodFacts)
             fetchedAgain.calories = 250
-            try expect(first.id != fetchedAgain.id && first.stableKey == fetchedAgain.stableKey,
-                       "Repeated lookups with fresh UUIDs must identify the same barcode food")
+            try expect(first.id != fetchedAgain.id && first.stableKey == fetchedAgain.stableKey
+                       && first.stableKey == "barcode:00036000291452",
+                       "Repeated UPC-A and EAN-13 lookups share a validated barcode identity")
+            try expect(first.barcode == "036000291452" && fetchedAgain.barcode == "0036000291452",
+                       "Canonical identity must not rewrite the original barcode values")
             state.toggleFavorite(first)
-            try expect(state.isFavorite(fetchedAgain), "Favorite lookup must survive a different UUID and name")
+            try expect(state.archive.favorites == [first.stableKey], "New favorites persist the canonical identity key")
+            try expect(state.isFavorite(fetchedAgain), "Favorite lookup must survive a different barcode representation")
             try expect(state.favoriteFoods.count == 1 && state.favoriteFoods.first == first, "Favorite food is saved and visible once")
+            let historical = try historicalDate()
+            try expect(state.addEntry(food: first, meal: .breakfast, servings: 1, date: historical),
+                       "Log the original barcode representation")
             try expect(state.addEntry(food: fetchedAgain, meal: .lunch, servings: 1), "Log a repeated lookup")
             try expect(state.archive.savedFoods.filter { $0.stableKey == first.stableKey }.count == 1,
                        "Repeated barcode must not duplicate saved foods")
             try expect(state.entries.first?.food == fetchedAgain, "Logged nutrition retains the actual lookup snapshot")
+            try expect(state.entries.contains { $0.food.barcode == first.barcode },
+                       "Historical entry snapshots retain the original barcode representation")
             try expectPersisted(state, fixture)
             let reloaded = fixture.state()
-            try expect(reloaded.isFavorite(fetchedAgain) && reloaded.favoriteFoods.count == 1, "Stable favorite survives relaunch")
+            try expect(reloaded.isFavorite(fetchedAgain) && reloaded.favoriteFoods.count == 1
+                       && reloaded.entries.contains { $0.food.barcode == first.barcode },
+                       "Canonical favorite and historical snapshot survive relaunch")
             reloaded.toggleFavorite(fetchedAgain)
             try expect(!reloaded.isFavorite(first) && reloaded.favoriteFoods.isEmpty, "Either lookup can remove the same favorite")
             try expectPersisted(reloaded, fixture)
+
+            let legacyKey = "barcode:\(first.barcode!)"
+            var legacyArchive = reloaded.archive
+            legacyArchive.favorites = [legacyKey]
+            try fixture.writeDiary(JSONEncoder().encode(legacyArchive))
+            let legacy = fixture.state()
+            try expect(legacy.archive.favorites == [legacyKey], "Relaunch preserves an old literal favorite key")
+            try expect(legacy.isFavorite(fetchedAgain) && legacy.favoriteFoods.count == 1,
+                       "Old literal favorite keys match the canonical barcode")
+            let legacyBytes = try fixture.readDiary()
+            let beforeFailedUnfavorite = legacy.archive
+            try fixture.blockWrites()
+            legacy.toggleFavorite(fetchedAgain)
+            try expect(legacy.archive == beforeFailedUnfavorite && legacy.storageError != nil,
+                       "A failed unfavorite leaves the old favorite state unchanged")
+            try expect(fixture.readBlockedDiary() == legacyBytes, "A failed unfavorite preserves the archive bytes")
+            try fixture.unblockWrites()
+            legacy.toggleFavorite(fetchedAgain)
+            try expect(!legacy.isFavorite(first) && legacy.archive.favorites.isEmpty,
+                       "Unfavorite removes canonical and compatible legacy keys")
+            try expectPersisted(legacy, fixture)
 
             let builtin = try require(AppState.foodDatabase.first, "Starter library fixture")
             var custom = builtin
             custom.id = UUID(); custom.name = builtin.name.uppercased(); custom.source = .custom
             custom.calories += 10
             try expect(custom.stableKey == builtin.stableKey, "Local stable identity ignores name casing and UUID")
-            try expect(reloaded.addEntry(food: custom, meal: .snack, servings: 1), "Save a customized library food")
-            let matches = reloaded.allFoods.filter { $0.stableKey == builtin.stableKey }
+            try expect(legacy.addEntry(food: custom, meal: .snack, servings: 1), "Save a customized library food")
+            let matches = legacy.allFoods.filter { $0.stableKey == builtin.stableKey }
             try expect(matches == [custom], "Saved nutrition must take precedence over a duplicate generic library food")
             var otherPortion = custom
             otherPortion.servingText = "1 tablespoon"
             try expect(otherPortion.stableKey != custom.stableKey, "Different serving bases are distinct foods")
-            reloaded.toggleFavorite(custom)
-            try expect(reloaded.quickFoods.first?.stableKey == custom.stableKey, "Favorites lead quick food choices")
-            try expectPersisted(reloaded, fixture)
+            let unit = food("GTIN-13 unit", barcode: "3017620422003", source: .openFoodFacts)
+            let casePack = food("GTIN-14 case pack", barcode: "13017620422000", source: .openFoodFacts)
+            try expect(unit.stableKey == "barcode:03017620422003",
+                       "GTIN-13 identity uses the fixed 14-digit representation")
+            try expect(casePack.stableKey == "barcode:13017620422000" && casePack.stableKey != unit.stableKey,
+                       "A nonzero GTIN-14 packaging indicator remains a distinct identity")
+            let invalid = food("Invalid barcode", barcode: "036000291453", source: .openFoodFacts)
+            let separated = food("Separated barcode", barcode: "036-000-291452", source: .openFoodFacts)
+            try expect(invalid.stableKey == "barcode:036000291453" && separated.stableKey == "barcode:036-000-291452"
+                       && invalid.stableKey != first.stableKey && separated.stableKey != first.stableKey,
+                       "Invalid or ambiguously formatted legacy barcodes stay literal and distinct")
+            legacy.toggleFavorite(custom)
+            try expect(legacy.quickFoods.first?.stableKey == custom.stableKey, "Favorites lead quick food choices")
+            try expectPersisted(legacy, fixture)
         }
     }
 

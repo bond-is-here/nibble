@@ -158,7 +158,7 @@ final class AppState: ObservableObject {
         var keys = Set<String>()
         return entries.sorted { $0.date > $1.date }.compactMap { keys.insert($0.food.stableKey).inserted ? $0.food : nil }.prefix(12).map { $0 }
     }
-    var favoriteFoods: [FoodItem] { allFoods.filter { archive.favorites.contains($0.stableKey) } }
+    var favoriteFoods: [FoodItem] { allFoods.filter(isFavorite) }
     var quickFoods: [FoodItem] {
         var keys = Set<String>()
         return (favoriteFoods + recentFoods + Self.foodDatabase).filter { keys.insert($0.stableKey).inserted }.prefix(8).map { $0 }
@@ -166,11 +166,15 @@ final class AppState: ObservableObject {
     func entries(on date: Date) -> [FoodLogEntry] {
         archive.entries.filter { Calendar.current.isDate($0.date, inSameDayAs: date) }.sorted { $0.date > $1.date }
     }
-    func isFavorite(_ food: FoodItem) -> Bool { archive.favorites.contains(food.stableKey) }
+    func isFavorite(_ food: FoodItem) -> Bool {
+        !archive.favorites.isDisjoint(with: food.favoriteKeys)
+    }
     func toggleFavorite(_ food: FoodItem) {
         guard food.isValid else { return }
         var next = archive
-        if next.favorites.contains(food.stableKey) { next.favorites.remove(food.stableKey) }
+        if !next.favorites.isDisjoint(with: food.favoriteKeys) {
+            next.favorites.subtract(food.favoriteKeys)
+        }
         else {
             next.favorites.insert(food.stableKey)
             if !next.savedFoods.contains(where: { $0.stableKey == food.stableKey }) { next.savedFoods.append(food) }

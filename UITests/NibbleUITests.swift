@@ -347,11 +347,27 @@ final class NibbleUITests: XCTestCase {
 
     private func reveal(_ element: XCUIElement, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         if !element.exists { _ = element.waitForExistence(timeout: 3) }
-        for _ in 0..<8 {
+        // SwiftUI can leave an element in the accessibility tree while it is
+        // far outside the viewport. Always swiping in one direction made the
+        // compact device tests overshoot targets above the current position.
+        // Use the element's frame to choose the direction on every pass.
+        for _ in 0..<16 {
             if element.exists && element.isHittable { return }
             let scroll = app.scrollViews.firstMatch
             guard scroll.exists else { break }
-            if towardTop { scroll.swipeDown() } else { scroll.swipeUp() }
+            let viewport = scroll.frame.isEmpty ? app.windows.firstMatch.frame : scroll.frame
+            let top = viewport.minY + 12
+            let bottom = viewport.maxY - 12
+            let frame = element.frame
+            if frame.maxY < top {
+                scroll.swipeDown()
+            } else if frame.minY > bottom {
+                scroll.swipeUp()
+            } else if towardTop {
+                scroll.swipeDown()
+            } else {
+                scroll.swipeUp()
+            }
         }
         XCTAssertTrue(element.exists && element.isHittable, "Control is not reachable: \(element)\n\(app.debugDescription)", file: file, line: line)
     }

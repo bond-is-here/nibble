@@ -1,144 +1,76 @@
 # Nibble — App Store release checklist
 
-Prepared September 5, 2026. The app builds for iOS, but has not been signed, uploaded, submitted, or approved. No purchase or membership enrollment has been made.
+Last audited September 8, 2026. This is release-readiness documentation, not a customer-ready or submitted-release claim. Nibble has not been signed for distribution, uploaded, submitted, or approved. No new account, agreement, payment, or external write was made in this audit.
 
-## Completed preparation
+## Current release status — audited, still gated
 
-- [x] Native iPhone app, app icon, camera purpose string, privacy manifest, and shared scheme.
-- [x] 37 diary/storage scenarios (600 assertions) and 150 barcode checks.
-- [x] Full iPhone Simulator Debug and unsigned iPhone Release builds on GitHub's standard macOS 26 runner.
-- [x] Privacy/support documents, in-app links under You, listing copy, and review-notes draft.
-- [x] [Pull request #1](https://github.com/bond-is-here/nibble/pull/1) opened with signed commits.
-- [x] Importable [Ojas-equivalent branch rules](../.github/rulesets/README.md) recorded. JSON files do not activate protections; verify GitHub Settings separately.
+Nibble is being reviewed on branch `codex/iphone-release-qa`. Main-branch PR2 is merged; [PR3 is open](https://github.com/bond-is-here/nibble/pull/3). This release pass includes canonical GTIN identity matching, legacy favorite compatibility, delayed barcode-flow coverage, and direction-aware compact-screen UI navigation.
 
-Initial build evidence:
+| Area | Current evidence | Status |
+| --- | --- | --- |
+| Local checks | `Tools/check.sh` passed 1,154 checks: 618 diary, 159 barcode, 331 macro, 28 storage, 12 palette, and 6 reporter. | Verified locally; not a release approval. |
+| Verified iPhone UI baseline | `febc521`, [run 34181081328](https://github.com/bond-is-here/nibble/actions/runs/34181081328): artifact locally verified at iPhone Air / iOS 26.2 with 7 passed, 0 failed, 0 skipped; screenshots inspected. | Historical baseline; it predates later Dynamic Type and barcode-cancellation changes. |
+| Later CI | At `440c7ec`, [run 34182565224](https://github.com/bond-is-here/nibble/actions/runs/34182565224) had standard-device success for both builds and the UI step. The compact UI summary was 5 passed, 3 failed; all three failures were the old one-direction scroll helper overshooting off-screen targets. | Fixed in this release pass; revalidate both sizes in the follow-up run. |
+| Latest recorded CI | [Run 34183944655](https://github.com/bond-is-here/nibble/actions/runs/34183944655) at `da25adb` completed with the same compact navigation failure after passing shared checks and both builds. Ten UI journeys are configured per size. | Superseded by the follow-up run for this release pass; no ten-journey pass claim yet. |
+| Access and toolchain | Browser artifact review is available. Local full Xcode still requires the owner’s license/first launch. | Open. |
+| Distribution | Apple account/team, signing access, membership, identifier continuity, seller/copyright identity, and App Review contact are unknown. No upload, payment, or agreement acceptance has occurred. | Open. |
+| Hardware and broad QA | Physical-iPhone camera, lock/backup behavior, broad VoiceOver, and supported-OS/device QA have not been performed. | Open. |
+| Provider and privacy label | Open Food Facts API v2 remains supported but deprecated. The current provider contact/registration, production request retention, and final App Store privacy answer are unresolved. | Open; never finalize Data Not Collected from local-only storage alone. |
 
-| Item | Result |
-| --- | --- |
-| Commit tested | `00bc15355f0cc682612bf92446c8c53cb073ec50` |
-| Workflow | [Successful run 34000992086](https://github.com/bond-is-here/nibble/actions/runs/34000992086) |
-| Xcode | 26.6, build 17F113 |
-| SDK | iOS SDK major version >=26 check passed |
-| Shared checks | Passed |
-| iPhone Simulator Debug | Passed |
-| Unsigned iphoneos Release | Passed |
-| Signed archive / physical-device tests | Not performed |
+The latest local checks validate implementation behavior, including the local storage and request configuration. They do not establish provider-side retention, physical-device protection behavior, signed-release behavior, App Review acceptance, or customer readiness.
 
-Use the [latest workflow result](https://github.com/bond-is-here/nibble/actions/workflows/ios.yml) for subsequent commits. Build success does not prove runtime behavior, signing readiness, or App Store acceptance. Git commit signing is separate from Apple app signing.
+## 1. Account, identity, and no-payment boundary
 
-## 1. Account and no-payment boundary
-
-- [ ] Sign in to App Store Connect and confirm an existing active Apple Developer Program membership or authorized team. The browser currently requires sign-in, so membership is unknown.
-- [ ] If there is no membership, stop before payment. A free Apple account supports limited personal-device testing, not App Store distribution. Standard membership is US$99/year, with regional pricing and waivers for eligible organizations. [Membership comparison](https://developer.apple.com/support/compare-memberships/), [enrollment](https://developer.apple.com/programs/enroll/).
-- [ ] Confirm control of `com.caloriecompass.app`, or choose/register an available identifier before the first release. Preserve continuity if an existing Calorie Compass listing actually exists; repository history does not prove one does.
+- [ ] Sign in to App Store Connect and confirm an active Apple Developer Program membership or authorized team. Do not infer this from repository access.
+- [ ] Confirm control of `com.caloriecompass.app`, or choose/register an available identifier before the first release. Preserve continuity only if an existing Calorie Compass listing is actually confirmed.
 - [ ] Verify availability and rights to the proposed name Nibble, and create/select the correct iOS app record.
-- [ ] Supply the actual seller/copyright identity and private App Review contact name, email, and phone directly in App Store Connect. None should be invented or committed to this public repository.
-- [ ] Set price Free, with no subscriptions or in-app purchases. Do not initiate a Paid Apps Agreement, banking setup, or purchase for this release. Any agreement acceptance remains with the authorized account owner. [Apple's agreements guidance](https://developer.apple.com/help/app-store-connect/manage-agreements/sign-and-update-agreements/).
+- [ ] Supply the actual seller/copyright identity and private App Review contact name, email, and phone directly in App Store Connect. Do not invent or commit these details to this public repository.
+- [ ] Set price Free, with no subscriptions or in-app purchases. Any agreement acceptance, banking setup, or membership payment remains with the authorized account owner; none was initiated here.
 - [ ] Choose territories, resolve applicable trader/contact declarations, and decide release timing.
 
-## 2. Signing and device QA
+## 2. Signing, toolchain, device, and runtime QA
 
-- [ ] Use a full Xcode 26-or-later installation with iOS 26 SDK or later for upload. This requirement has applied since April 28, 2026; the app's iOS 17 deployment target is a separate runtime minimum. [Apple's SDK notice](https://developer.apple.com/news/?id=ueeok6yw).
-- [ ] Produce and validate a signed Release archive for a generic iOS device using the correct team and provisioning. Verify bundle ID, entitlements, app icon, camera string, privacy manifest inclusion, version/build uniqueness, and archive validation.
-- [ ] Review export-compliance answers against the final archive. The project currently sets `ITSAppUsesNonExemptEncryption = NO`; confirm it remains accurate for the shipped code and dependencies.
-- [ ] Test a normal launch without `--demo`: all three plan modes, metric/imperial input, calorie-only foods, favorites/recents, serving and gram/milliliter portions, edit/delete/Undo, historical dates, and Patterns.
-- [ ] Test migration, retained legacy records, persistence after relaunch, storage failure, and unreadable archives with fixtures. Only use disposable sample data for uninstall/reinstall tests.
+- [ ] Complete the owner’s local Xcode license/first-launch setup, then use a full Xcode 26-or-later installation with the required iOS SDK for the final upload. CI build success does not replace this gate.
+- [ ] Produce and validate a signed Release archive for a generic iOS device using the correct team and provisioning. Verify bundle ID, entitlements, icon, camera purpose string, privacy manifest inclusion, version/build uniqueness, and archive validation.
+- [ ] Review export-compliance answers against the final archive. The project currently sets `ITSAppUsesNonExemptEncryption = NO`; confirm that remains accurate for the shipped code and dependencies.
+- [ ] Test a normal launch without `--demo`: all three plan modes, metric/imperial input, calorie-only foods, favorites/recents, serving and gram/milliliter portions, edit/delete/Undo, historical dates, Patterns, and Macro Mix.
+- [ ] Test migration, retained legacy records, persistence after relaunch, storage failure, and unreadable archives with fixtures. Use disposable sample data only for uninstall/reinstall tests.
 - [ ] On a physical iPhone, test camera allow/deny/restricted states, Settings return, reopening, background/foreground, and package scans. Test typed lookup, incomplete/unknown products, timeout/offline/rate limits, manual fallback, and saved foods offline.
-- [ ] Check supported phone sizes/OS versions, keyboard layout, larger text, VoiceOver, and Reduce Motion. macOS design previews are not evidence of iPhone UI or camera QA.
+- [ ] Check supported phone sizes/OS versions, keyboard layout, larger text, VoiceOver, and Reduce Motion. MacOS design previews are not evidence of iPhone UI, camera, or accessibility QA.
 
-## 3. Privacy and support gates
+## 3. Privacy, support, storage, and provider gates
 
-- [ ] Verify the public [privacy policy](https://github.com/bond-is-here/nibble/blob/main/PRIVACY.md), [support page](https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md), and [Issues contact](https://github.com/bond-is-here/nibble/issues) after merge, without authentication.
-- [ ] Verify in-app Privacy policy and Help & support links under You on the release candidate. Apple requires an accessible policy in both the app and store metadata. [Review Guidelines 5.1.1(i)](https://developer.apple.com/app-store/review/guidelines/).
-- [ ] Confirm GitHub Issues is an acceptable support route for the intended territories/review and supply any additional actual contact information required by the [Support URL field](https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information). Warn against posting personal health information publicly.
-- [ ] Verify Open Food Facts' handling of barcode requests, source IPs, logs, retention, purpose, and linkage. Its privacy page was bot-blocked during preparation; no retention guarantee has been established.
-- [ ] Resolve the provider's current [API integration requirements](https://openfoodfacts.github.io/openfoodfacts-server/api/): actual owner contact for the User-Agent, usage registration, and a reviewed migration from the still-supported but deprecated v2 product endpoint. The present agent links to the public repository; it does not invent a contact email. Do not treat a successful product lookup as approval of the integration or privacy declaration.
-- [ ] Complete App Privacy using [Apple's definitions](https://developer.apple.com/app-store/app-privacy-details/) and the [code evidence](metadata.md#app-privacy-preparation--declaration-remains-open). Do not choose Data Not Collected just because the diary is local. Reconcile any retained provider/support data with the manifest and policy.
-- [ ] Verify health-data storage protections on a physical iPhone. The dedicated storage folder now excludes diary/profile and migration recovery records from backups; iOS writes use complete file protection. Legacy UserDefaults values move to a verified recovery file before removal, including on already-migrated installations. Test lock/unlock, migration, and a device backup against [Guideline 5.1.3(ii)](https://developer.apple.com/app-store/review/guidelines/) and [Apple's backup guidance](https://developer.apple.com/documentation/foundation/optimizing-your-app-s-data-for-icloud-backup). Existing external backup copies remain outside the app's control.
-- [ ] Verify deletion instructions: removing an entry retains its saved food and legacy migration records; Delete App removes the current app container, while Offload App keeps data. Backups and third-party support records are separate. The app creates no HealthKit records.
+- [ ] After PR3 is merged, verify the public [privacy policy](https://github.com/bond-is-here/nibble/blob/main/PRIVACY.md), [support page](https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md), and [Issues contact](https://github.com/bond-is-here/nibble/issues) load without authentication.
+- [ ] Verify the in-app Privacy policy and Help & support links under You on the signed release candidate. Keep public policy, in-app disclosure, store metadata, and the shipped behavior aligned.
+- [ ] Resolve the Support URL requirement for the chosen territories. GitHub Issues is the planned public support route, but the current page intentionally publishes no private email or legal address; confirm whether actual legal address, email, and telephone details must be exposed and provide real details if required. Never invent contact information.
+- [ ] Verify Open Food Facts’ production handling of barcode requests, source IPs, logs, retention, purpose, and linkage. Nibble’s ephemeral session and no-local-HTTP-history behavior do not prove provider-side deletion or non-retention.
+- [ ] Resolve the provider integration gate: obtain the actual owner contact for the User-Agent, complete the provider’s requested app/usage registration or form as applicable, and decide whether to migrate from the still-supported but deprecated v2 product endpoint. The current code identifies itself with `Nibble/1.0 (+https://github.com/bond-is-here/nibble)`, not an invented contact email. A successful lookup is not proof of registration, approval, or privacy-label correctness.
+- [ ] Complete App Privacy using Apple’s definitions and the actual provider/support facts. Do not select Data Not Collected until the third-party request-retention question is resolved; classify any retained request data by its actual use and review optional GitHub support submissions separately.
+- [ ] Verify on a physical iPhone that the dedicated `Application Support/Nibble` directory and its diary/profile/migration files behave as intended during lock/unlock and backup. The source marks the directory excluded from future backups and uses complete file protection for iOS writes; local storage checks verified those settings, but physical-device behavior remains unverified. Existing external backup copies remain outside Nibble’s control.
+- [ ] Verify deletion instructions: deleting an entry retains its saved food and legacy migration records; Delete App removes the current app container, while Offload App keeps data. Backups, Open Food Facts records, and public support posts are separate. Nibble creates no HealthKit records.
 
-## 4. Listing, screenshots, and submission
+## 4. Listing, screenshots, review, and submission
 
-- [ ] Review [metadata.md](metadata.md) against the final build. Recheck listing field lengths after edits, including the Macro Mix and no-backup disclosures. Confirm name, category Health & Fitness, free pricing, and actual rights-holder copyright.
-- [ ] Complete the live age-rating questionnaire. Calorie tracking is a Health or Wellness Topic; evaluate Medical or Treatment Information separately. The estimator's adult restriction is not an app-wide age gate, and no final rating is preselected. [Definitions](https://developer.apple.com/help/app-store-connect/reference/app-information/age-ratings-values-and-definitions), [rating setup](https://developer.apple.com/help/app-store-connect/manage-app-information/set-an-app-age-rating).
-- [ ] Rehearse the draft reviewer steps. No login should be needed, and manual entry must work when the live barcode provider fails. Keep estimate limitations and data attribution accessible.
-- [ ] Capture actual iOS screenshots using fictional data and [Apple's required dimensions](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications). Follow the [screenshot plan](metadata.md#screenshot-plan). Do not submit the macOS DEMO/design previews, even if resized.
+- [ ] Review [metadata.md](metadata.md) against the final signed build. Recheck field lengths, Macro Mix wording, the local-storage/backup wording, provider disclosure, name, category, price, and actual rights-holder copyright.
+- [ ] Complete the live age-rating questionnaire. Calorie tracking is a Health or Wellness Topic; evaluate Medical or Treatment Information separately. Do not infer a final rating from the adult-only estimate form.
+- [ ] Rehearse the draft reviewer steps on the release candidate. No login should be needed, and manual entry must work when the live barcode provider fails. Keep estimate limitations and data attribution accessible.
+- [ ] Capture actual iOS screenshots using fictional data and Apple’s required dimensions. Follow the [screenshot plan](metadata.md#screenshot-plan). Do not submit MacOS design previews, even if resized.
 - [ ] Verify artwork rights and Open Food Facts attribution/license.
-- [ ] Upload the validated signed build, finish privacy/age-rating/contact fields, and submit only after all gates pass. Record Apple's review outcome; submission is not approval or availability.
+- [ ] Upload the validated signed build, finish privacy/age-rating/contact fields, and submit only after every applicable gate passes. Record Apple’s review outcome; submission is not approval or availability.
 
-Recheck linked requirements at the actual submission date.
+## Implementation evidence carried forward
 
-## Macro Mix update — build 3
+- [x] Local storage implementation marks the dedicated folder excluded from backups, applies complete file protection to iOS writes/existing files, and preserves legacy UserDefaults values in protected recovery storage before removal. The 28 local storage checks include failed writes, migration retries, backup-exclusion metadata, and demo isolation.
+- [x] Barcode networking uses an ephemeral session with no HTTP cache, cookies, or credential storage. Local tests cover request configuration, cancellation, delayed responses, offline fallback, and saved-food reuse. These are client-side checks only; provider retention and contact/registration remain open.
+- [x] Macro Mix, portion previews, weekly macro summaries, and local suggestions are implemented. The standard split is 25% protein, 45% carbs, and 30% fat by energy; unknown macros remain unknown and are not silently converted to zero. The 331 macro checks are local evidence, not a substitute for current iPhone runtime/accessibility QA.
+- [x] The shared scheme, UI target, named-failure reporter, larger-text branches, and ten-journey matrix are configured. Configuration is not a passed runtime or accessibility result.
 
-- [x] Macro rings/details, saved split editor, local suggestion engine, portion preview, and weekly macro patterns implemented.
-- [x] Local shared SwiftUI typecheck, existing 750 assertions/checks, and 329 new Macro Mix checks passed.
-- [x] Native macOS design previews rendered and visually inspected. These remain design previews, not iOS screenshots.
-- [x] Macro Mix at commit `4232629` passed both iOS build configurations in [CI run 34177188557](https://github.com/bond-is-here/nibble/actions/runs/34177188557).
-- [ ] Verify iPhone runtime after completing Xcode's first-launch license/setup. Check the newest commit's CI separately after each functional change.
-- [ ] Test tap-to-explore, switching macro focus, save/cancel/reset/invalid splits, scaled gram targets, partial/no-target/history states, and suggestions → portion → save on iPhone.
-- [ ] Verify existing-diary upgrade, reduced motion, small screens, larger text, and VoiceOver. Recheck all earlier release/privacy gates; this update does not resolve them automatically.
+## Preserved historical evidence — not current certification
 
-## Storage hardening
+- `bd1ac48` / [run 34177621406](https://github.com/bond-is-here/nibble/actions/runs/34177621406): prior storage-hardening commit passed shared checks and both iOS builds.
+- `4232629` / [run 34177188557](https://github.com/bond-is-here/nibble/actions/runs/34177188557): prior Macro Mix commit passed both iOS build configurations.
+- [Run 34178369288](https://github.com/bond-is-here/nibble/actions/runs/34178369288) recorded three earlier iPhone journeys; later changes mean it is historical evidence only.
+- `febc521` / [run 34181081328](https://github.com/bond-is-here/nibble/actions/runs/34181081328) is the latest locally verified seven-journey baseline described above, including inspected iPhone screenshots.
+- `440c7ec` / [run 34182565224](https://github.com/bond-is-here/nibble/actions/runs/34182565224) is retained as qualified build/UI evidence: standard-device success, compact UI failure with public exit 65, and no established root cause. The exact eight-test summaries and screenshots were not downloaded.
 
-- [x] Exclude the Nibble folder from backups before storing health data; use complete file protection for iOS writes and existing files.
-- [x] Preserve and verify original legacy property-list values in protected recovery storage before removing the three UserDefaults values. Interrupted cleanup resumes, malformed records stay recoverable, and existing JSON takes precedence.
-- [x] All 1,079 diary/barcode/macro assertions and 28 protected-storage checks passed locally, including failed writes, migration retries, actual backup-exclusion metadata, and demo isolation.
-- [x] Storage commit `bd1ac48` passed all shared checks and both iOS builds in [CI run 34177621406](https://github.com/bond-is-here/nibble/actions/runs/34177621406).
-- [ ] Verify protection during physical-device lock/unlock and backup. Local and build-only checks do not exercise physical iOS data-protection behavior.
-
-## iPhone runtime regression tests
-
-- [x] Add a shared-scheme XCTest UI target and a simulator runner, with UUID-isolated real storage enabled only in Debug builds.
-- [x] Cover fresh onboarding, quick logging, delete/Undo, portion-preview replacement, edited-entry Undo, calorie-only foods, fractional manual targets, valid/invalid macro splits, reset/cancel, and relaunch persistence.
-- [x] In [run 34178369288](https://github.com/bond-is-here/nibble/actions/runs/34178369288), three iPhone journeys passed: calorie-only foods/relaunch, live portion previews/edit/Undo, and quick logging/delete/Undo/relaunch.
-- [x] Verify the complete seven-journey UI suite after fixing its text-replacement helper. The first run retained the existing `25`; the later `febc521` artifact verifies that the complete manual-target/custom-split journey now passes (evidence below).
-- [ ] Inspect the resulting iPhone screenshots, then test additional supported screen sizes and accessibility settings. Complete physical camera, signing, account, and privacy gates above before release.
-
-## Barcode network privacy
-
-- [x] Replace the shared networking session with an ephemeral session, no HTTP cache, no cookie handling, and no credential store. Logged and favorited products still persist through the protected diary archive.
-- [x] All 1,116 local checks passed, including nine new request/configuration assertions. These verify client behavior, not provider-side retention.
-- [x] Verify this change's iOS CI in the `febc521` baseline below. Provider/contact/privacy checks remain open above.
-
-## Expanded customer-journey checks
-
-- [x] Correct the UI text helper's placeholder-equality assumption. A real saved `25` must be cleared even when the placeholder is also `25`; backspacing an empty field is harmless. The follow-up run exposed this remaining helper error before the custom-split journey could complete.
-- [x] Fix Patterns to display `0` for an actual logged zero-calorie day; reserve `—` for a week with no logged days. Add a relaunch regression journey.
-- [x] Add iPhone journeys for rejected underage estimates and saved metric profiles, plus invalid barcode → manual macros → 200 ml portion → saved favorites.
-- [x] Pin the artifact uploader to Node-24-based v7.0.1 after CI reported the v4 runtime deprecation.
-- [x] Run all seven UI journeys and inspect the key resulting screenshots in the `febc521` baseline below. Local checks do not substitute for the runtime assertions or screenshot review.
-
-## Portion-screen usability and current QA
-
-- [x] Inspect actual iPhone Air screenshots from run `34179135984`: diary totals, calorie-only macro state, and two-serving preview. The preview's Save button was below the initial viewport.
-- [x] Move the portion Save action and validation feedback into a bottom safe-area bar; add an assertion that Save is reachable before scrolling. Keep the nutrition details scrollable.
-- [x] Replace decorative text symbols that rendered as green emoji tiles on iOS with accessibility-hidden SF Symbols.
-- [x] In [run 34179784015](https://github.com/bond-is-here/nibble/actions/runs/34179784015), shared checks and both iOS builds passed. The expanded UI run failed on the estimate's formatted `2,100` label and the macro field's retained `25` during replacement. Neither incomplete journey is certified.
-- [x] Correct the locale-specific display expectation and use the iOS Select All editing action for percentage replacement instead of assuming the caret position.
-- [x] Verify the new commit's complete simulator result and inspect its sticky-button screenshots (evidence below). Physical-device, accessibility, privacy, signing, and account gates remain open.
-- [x] Follow-up commit `febc521` passed shared checks, both iOS builds, and the UI-test step in [run 34181081328](https://github.com/bond-is-here/nibble/actions/runs/34181081328). This result predates the Dynamic Type changes below.
-- [x] Download and verify that run's artifact digest, read its summary (7 passed, 0 failed, 0 skipped on iPhone Air / iOS 26.2), and inspect actual iPhone screenshots of the visible portion Save, saved 30/40/30 split, 200 ml manual-label preview, and zero-calorie average.
-
-## Dynamic Type and compact-screen pass
-
-- [x] Use scaled fonts for diary, food entry, onboarding, profile, Patterns, and Macro Mix text. Stack dense rows at accessibility sizes; keep decorative ring labels fixed because accessible, scalable values are repeated outside the rings.
-- [x] Make the entire food picker scrollable, grow form/button heights, enlarge small action targets, and keep the bottom navigation usable at larger sizes. Respect Reduce Motion for date, onboarding, and toast transitions.
-- [x] Darken secondary text; all 12 shared ink/muted contrast pairs meet 4.5:1 on the actual six surface colors. All 1,128 local checks and the shared warnings-as-errors typecheck pass.
-- [x] Inspect macOS previews of regular and accessibility-layout diary, portion, and Macro Mix screens. They verify shared layout branching, not iOS font scaling or VoiceOver.
-- [x] Add a largest-text iPhone journey with real isolated persistence, a scaling assertion, visible portion Save, and XCTest clipping/description/contrast audits. Add independent regular and SE-sized CI jobs without cancelling one on the other's failure.
-- [ ] Run and inspect both eight-journey jobs and their actual iOS screenshots after this pass. An audit of one visible screen does not certify whole-app accessibility; complete VoiceOver, intermediate text sizes, older supported iOS versions, and physical-device gates above.
-- [x] The first matrix run (`34182133064`) exposed a Debug-only compiler error: Reduce Motion is a read-only environment value. Remove the attempted test override; app behavior continues to read the real system preference. Add a Debug shared-code typecheck so test-only branches are checked locally as well. Re-run both iPhone jobs; no accessibility runtime result exists from this failed build.
-- [x] At `440c7ec`, the standard-device job in [run 34182565224](https://github.com/bond-is-here/nibble/actions/runs/34182565224) passed shared checks, both builds, and the UI-test step. Its artifact is `10039653143`, SHA-256 `63c72c529719b72d4babe4780b68df3fbe8f154c85d2929fdd987aa6bcd09a86`.
-- [ ] Inspect that artifact's exact test summary and iPhone screenshots; verify the compact job separately. Browser artifact access currently requires unlocking the Mac. A green job alone does not complete whole-app or physical-device accessibility QA.
-- [x] The compact job in `34182565224` finished with a UI-test failure after passing both builds. Public checks expose only exit code 65; the exact failed test and cause are not yet established. Its artifact is `10039742469`, SHA-256 `41fd9869d6b2ae5e80d863700911fae64786b80c2a540309e7aaebbe17930c21`. Do not assume a timing-only failure or certify the compact layout.
-
-Implementation follows Apple's [Dynamic Type guidance](https://developer.apple.com/videos/play/wwdc2024/10074/) and [XCTest accessibility audit guidance](https://developer.apple.com/documentation/accessibility/performing-accessibility-audits-for-your-app). Do not treat implemented support or configured audits as a passed release gate.
-
-## Pending-lookup review
-
-- [x] Cancel in-flight barcode work when switching to manual food entry, opening the camera, editing the typed code, leaving barcode mode, or dismissing the picker. Existing cancellation guards discard late results; a manual label draft must not be replaced by a stale product response.
-- [x] Clarify the portion caption and give the manual-label fallback a 44-point action height. All 1,128 local checks and both shared-code typechecks pass after the change.
-- [x] Add two iPhone journeys with fake delayed-product/offline transports, enabled only for UUID-isolated Debug test launches. One waits beyond the response deadline and checks that a manual draft survives; the other proves the transport can deliver through the real decoder, then exercises offline failure and reuse of the saved product. The existing HTTP suite separately checks cancellation of the underlying request.
-- [ ] Verify the follow-up ten-journey iPhone run. Adding the regressions does not establish a runtime pass; live-provider and physical-camera checks remain separate.
-- [x] Refresh draft store copy to describe Macro Mix and clearly disclose that the diary is not cloud-synced or included in device backups. This remains unpublished draft metadata.
-- [x] Publish exported UI counts and named failures directly in PR-check annotations, with escaped messages and a ten-error cap; retain complete diagnostic artifacts. Six shell checks cover reporting and escaping. This improves the next run's diagnostics without changing its test exit status or suppressing assertions.
+Earlier notes cited 1,079, 1,116, 1,128, or 1,134 local checks as features landed. Those are historical snapshots; the current aggregate is 1,154 with the breakdown in the status table. Recheck all linked platform and provider requirements at the actual submission date.
