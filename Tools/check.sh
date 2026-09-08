@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
+bash Tests/UIReportChecks.sh
 mkdir -p .build
 plutil -lint Nibble.xcodeproj/project.pbxproj CalorieCompass/PrivacyInfo.xcprivacy
 xmllint --noout Nibble.xcodeproj/xcshareddata/xcschemes/Nibble.xcscheme

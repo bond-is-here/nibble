@@ -47,6 +47,10 @@ set -e
 if [[ -d "$nibble_result_dir/NibbleUI.xcresult" ]]; then
   xcrun xcresulttool get test-results summary --path "$nibble_result_dir/NibbleUI.xcresult" \
     > "$nibble_result_dir/summary.json" || echo "Could not export test summary." >&2
+  if [[ -s "$nibble_result_dir/summary.json" ]]; then
+    bash Tools/report-ui-results.sh "$nibble_result_dir/summary.json" \
+      || echo "Could not publish test summary; inspect the xcresult bundle." >&2
+  fi
   xcrun xcresulttool export attachments --path "$nibble_result_dir/NibbleUI.xcresult" \
     --output-path "$nibble_result_dir/attachments" || echo "Could not export attachments; inspect the xcresult bundle." >&2
 fi
