@@ -44,10 +44,11 @@ struct AddFoodView: View {
             }
         }
         .background(Color.canvas)
-        // Keep an in-progress label or portion edit on screen. This prevents a
-        // compact-device scroll gesture from dismissing the entire Add Food
-        // sheet and losing the person's draft.
-        .interactiveDismissDisabled(showCustom || selectedFood != nil)
+        // Add Food is a task-like flow with an explicit close button. Disable
+        // the sheet's swipe-to-dismiss gesture for the whole flow so scrolling
+        // a long form can never discard an in-progress label, portion edit, or
+        // barcode lookup result.
+        .interactiveDismissDisabled(true)
         .sheet(isPresented: $showScanner) {
             ZStack(alignment: .topTrailing) {
                 BarcodeScannerView { code in
