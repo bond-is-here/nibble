@@ -158,7 +158,7 @@ struct MacroMixView: View {
         VStack(alignment: .leading, spacing: 15) {
             Eyebrow(text: "Next little bite", color: .ink)
             Text(insight.nudge.title).nibbleFont(size: 23, weight: .semibold, design: .rounded).tracking(-0.5)
-            Text(insight.nudge.detail).nibbleFont(size: 13).foregroundStyle(Color.ink.opacity(0.75)).lineSpacing(3)
+            Text(insight.nudge.detail).nibbleFont(size: 13).foregroundStyle(Color.ink).lineSpacing(3)
             ForEach(insight.suggestions) { suggestion in
                 Button { selectedFood = suggestion.food } label: {
                     HStack(spacing: 11) {

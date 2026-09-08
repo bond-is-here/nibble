@@ -370,7 +370,11 @@ final class NibbleUITests: XCTestCase {
         // identity. XCTest does not expose a parent pointer for XCUIElement.
         let targetPredicate: NSPredicate
         if element.identifier.isEmpty {
-            targetPredicate = NSPredicate(format: "label == %@", element.label)
+            targetPredicate = NSPredicate(
+                format: "elementType == %d AND label == %@",
+                element.elementType.rawValue,
+                element.label
+            )
         } else {
             targetPredicate = NSPredicate(format: "identifier == %@", element.identifier)
         }
