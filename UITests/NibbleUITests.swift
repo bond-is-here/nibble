@@ -366,19 +366,16 @@ final class NibbleUITests: XCTestCase {
         if element.exists && element.isHittable { return }
 
         // Sheets can leave the underlying tab's ScrollView in the hierarchy.
-        // Drive the deepest scroll view that contains the target's accessibility
-        // identity. XCTest does not expose a parent pointer for XCUIElement.
-        let targetPredicate: NSPredicate
-        if element.identifier.isEmpty {
-            targetPredicate = NSPredicate(
-                format: "elementType == %d AND label == %@",
-                element.elementType.rawValue,
-                element.label
-            )
-        } else {
-            targetPredicate = NSPredicate(format: "identifier == %@", element.identifier)
+        // Drive the deepest scroll view that contains the target's actual
+        // element type and accessibility identity. XCTest does not expose a
+        // parent pointer for XCUIElement, and SwiftUI can reuse labels such as
+        // "0" across unrelated text and text fields.
+        let scroll = app.scrollViews.allElementsBoundByIndex.reversed().first { candidate in
+            candidate.descendants(matching: element.elementType).allElementsBoundByIndex.contains { descendant in
+                if !element.identifier.isEmpty { return descendant.identifier == element.identifier }
+                return descendant.label == element.label
+            }
         }
-        let scroll = app.scrollViews.containing(targetPredicate).allElementsBoundByIndex.last
             ?? app.scrollViews.firstMatch
         guard scroll.exists else {
             XCTAssertTrue(false, "Control is not reachable: no scroll view for \(element)", file: file, line: line)
