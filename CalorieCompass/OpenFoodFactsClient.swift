@@ -76,13 +76,17 @@ struct OpenFoodFactsClient {
     func lookup(barcode: String) async throws -> FoodItem {
         try Task.checkCancellation()
         let normalized = try Self.normalizedBarcode(barcode)
-        guard var components = URLComponents(string: "https://world.openfoodfacts.org/api/v2/product/\(normalized).json") else {
+        guard var components = URLComponents(string: "https://world.openfoodfacts.org/api/v3/product/\(normalized)") else {
             throw FoodLookupError.invalidBarcode
         }
-        components.queryItems = [URLQueryItem(
-            name: "fields",
-            value: "product_name,product_name_en,generic_name,brands,nutriments,serving_quantity_unit,product_quantity_unit,no_nutrition_data"
-        )]
+        components.queryItems = [
+            URLQueryItem(name: "product_type", value: "food"),
+            URLQueryItem(name: "lc", value: "en"),
+            URLQueryItem(
+                name: "fields",
+                value: "product_name,product_name_en,generic_name,brands,nutriments,serving_quantity_unit,product_quantity_unit,no_nutrition_data"
+            )
+        ]
         guard let url = components.url else { throw FoodLookupError.invalidBarcode }
 
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 12)
@@ -169,8 +173,8 @@ struct OpenFoodFactsClient {
         } catch {
             throw FoodLookupError.invalidResponse
         }
-        guard decoded.status != 0 else { throw FoodLookupError.notFound }
-        guard decoded.status == 1, let product = decoded.product else { throw FoodLookupError.invalidResponse }
+        guard decoded.status != .notFound else { throw FoodLookupError.notFound }
+        guard decoded.status == .found, let product = decoded.product else { throw FoodLookupError.invalidResponse }
         guard let name = [product.productName, product.productNameEnglish, product.genericName]
             .compactMap({ $0?.nonempty }).first else { throw FoodLookupError.missingProductName }
 
@@ -236,15 +240,31 @@ private final class UITestProductProtocol: URLProtocol {
 #endif
 
 private struct OpenFoodFactsResponse: Decodable {
-    let status: Int
+    enum Status: Equatable {
+        case found
+        case notFound
+        case other
+    }
+
+    let status: Status
     let product: OpenFoodFactsProduct?
 
     enum CodingKeys: String, CodingKey { case status, product }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        status = try container.decode(Int.self, forKey: .status)
-        product = status == 1 ? try container.decodeIfPresent(OpenFoodFactsProduct.self, forKey: .product) : nil
+        if let legacyStatus = try? container.decode(Int.self, forKey: .status) {
+            status = legacyStatus == 1 ? .found : legacyStatus == 0 ? .notFound : .other
+        } else if let currentStatus = try? container.decode(String.self, forKey: .status) {
+            let normalized = currentStatus.lowercased()
+            status = normalized == "failure" ? .notFound : normalized.hasPrefix("success") ? .found : .other
+        } else {
+            status = .other
+        }
+
+        // Keep malformed non-found payloads classified by their status while
+        // refusing malformed product objects when the provider says it found one.
+        product = status == .found ? try container.decodeIfPresent(OpenFoodFactsProduct.self, forKey: .product) : nil
     }
 }
 
