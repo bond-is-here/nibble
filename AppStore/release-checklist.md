@@ -4,14 +4,13 @@ Last audited September 8, 2026. This is release-readiness documentation, not a c
 
 ## Current release status — audited, still gated
 
-Nibble is being reviewed on branch `codex/iphone-release-qa`. Main-branch PR2 is merged; [PR3 is open](https://github.com/bond-is-here/nibble/pull/3). This release pass includes canonical GTIN identity matching, legacy favorite compatibility, delayed barcode-flow coverage, and direction-aware compact-screen UI navigation.
+Nibble is being reviewed on branch `codex/compact-ui-followup`. Main-branch PR4 is merged; [PR5 is open](https://github.com/bond-is-here/nibble/pull/5). This release pass includes canonical GTIN identity matching, legacy favorite compatibility, delayed barcode-flow coverage, accessibility contrast, and compact-screen UI navigation.
 
 | Area | Current evidence | Status |
 | --- | --- | --- |
 | Local checks | `Tools/check.sh` passed 1,154 checks: 618 diary, 159 barcode, 331 macro, 28 storage, 12 palette, and 6 reporter. | Verified locally; not a release approval. |
-| Verified iPhone UI baseline | `febc521`, [run 34181081328](https://github.com/bond-is-here/nibble/actions/runs/34181081328): artifact locally verified at iPhone Air / iOS 26.2 with 7 passed, 0 failed, 0 skipped; screenshots inspected. | Historical baseline; it predates later Dynamic Type and barcode-cancellation changes. |
-| Later CI | At `440c7ec`, [run 34182565224](https://github.com/bond-is-here/nibble/actions/runs/34182565224) had standard-device success for both builds and the UI step. The compact UI summary was 5 passed, 3 failed; all three failures were the old one-direction scroll helper overshooting off-screen targets. | Fixed in this release pass; revalidate both sizes in the follow-up run. |
-| Latest recorded CI | [Run 34183944655](https://github.com/bond-is-here/nibble/actions/runs/34183944655) at `da25adb` completed with the same compact navigation failure after passing shared checks and both builds. Ten UI journeys are configured per size. | Superseded by the follow-up run for this release pass; no ten-journey pass claim yet. |
+| Verified iPhone UI matrix | `1c6740c`, [run 34273326952](https://github.com/bond-is-here/nibble/actions/runs/34273326952): standard and compact jobs both completed successfully, including shared checks, Debug/Release builds, and the full UI-journey step. UI result artifacts were retained for both sizes. | Verified CI evidence; artifacts are not a substitute for physical-device or signed-release QA. |
+| Historical UI evidence | Earlier runs `34181081328`, `34182565224`, and `34183944655` remain linked below for context. | Superseded by the all-green PR5 run. |
 | Access and toolchain | Browser artifact review is available. Local full Xcode still requires the owner’s license/first launch. | Open. |
 | Distribution | Apple account/team, signing access, membership, identifier continuity, seller/copyright identity, and App Review contact are unknown. No upload, payment, or agreement acceptance has occurred. | Open. |
 | Hardware and broad QA | Physical-iPhone camera, lock/backup behavior, broad VoiceOver, and supported-OS/device QA have not been performed. | Open. |
@@ -40,7 +39,7 @@ The latest local checks validate implementation behavior, including the local st
 
 ## 3. Privacy, support, storage, and provider gates
 
-- [ ] After PR3 is merged, verify the public [privacy policy](https://github.com/bond-is-here/nibble/blob/main/PRIVACY.md), [support page](https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md), and [Issues contact](https://github.com/bond-is-here/nibble/issues) load without authentication.
+- [ ] After PR5 is merged, verify the public [privacy policy](https://github.com/bond-is-here/nibble/blob/main/PRIVACY.md), [support page](https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md), and [Issues contact](https://github.com/bond-is-here/nibble/issues) load without authentication.
 - [ ] Verify the in-app Privacy policy and Help & support links under You on the signed release candidate. Keep public policy, in-app disclosure, store metadata, and the shipped behavior aligned.
 - [ ] Resolve the Support URL requirement for the chosen territories. GitHub Issues is the planned public support route, but the current page intentionally publishes no private email or legal address; confirm whether actual legal address, email, and telephone details must be exposed and provide real details if required. Never invent contact information.
 - [ ] Verify Open Food Facts’ production handling of barcode requests, source IPs, logs, retention, purpose, and linkage. Nibble’s ephemeral session and no-local-HTTP-history behavior do not prove provider-side deletion or non-retention.

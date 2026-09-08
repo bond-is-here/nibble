@@ -1,6 +1,6 @@
 # Nibble — App Store metadata draft
 
-Audited September 8, 2026 against the current working branch, README, and Swift source. This is preparation material, not evidence of an App Store listing, reserved name, approved privacy declaration, or completed submission. PR3 is open and current CI is not fully certified; copy only the intended field contents into App Store Connect after the release checks pass.
+Audited September 8, 2026 against the current working branch, README, and Swift source. This is preparation material, not evidence of an App Store listing, reserved name, approved privacy declaration, or completed submission. PR5 is open; its latest standard and compact CI jobs are green, but distribution gates remain open. Copy only the intended field contents into App Store Connect after the signed release checks pass.
 
 ## Listing fields (English — U.S.)
 
@@ -66,7 +66,7 @@ Verify the description remains within Apple's 4,000-character limit after edits.
 | Support URL | [Repository support page](https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md) |
 | Support contact linked by those pages | [Nibble GitHub Issues](https://github.com/bond-is-here/nibble/issues) |
 
-These URLs target the repository's public default branch. PR3 is not merged yet, so after merge verify both pages load without authentication and Issues permits users to contact the maintainers. Preserve these paths or update every reference if the repository moves. `ProfileView.swift` includes Privacy policy and Help & support links under You; verify their accessibility and public destinations in the signed release candidate.
+These URLs target the repository's public default branch. PR5 is not merged yet, so after merge verify both pages load without authentication and Issues permits users to contact the maintainers. Preserve these paths or update every reference if the repository moves. `ProfileView.swift` includes Privacy policy and Help & support links under You; verify their accessibility and public destinations in the signed release candidate.
 
 GitHub Issues is the planned public contact channel; never invent an email address. Apple’s current [Support URL field guidance](https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information) says the URL must lead to actual contact information (legal address, email address, and telephone number) as may be required by local law. The current Issues-only page has not been verified to satisfy that requirement; the owner must resolve it for the selected territories. App Review’s private contact fields are separate: the owner must supply a real contact name, email address, and phone number directly in App Store Connect. None has been provided for this draft.
 
