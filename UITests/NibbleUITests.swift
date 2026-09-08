@@ -223,6 +223,74 @@ final class NibbleUITests: XCTestCase {
         expectCalories("150")
     }
 
+    func testSlowBarcodeCannotReplaceManualFoodDraft() {
+        launchWithBarcodeFixture("delayed-product")
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Scan barcode"])
+        replace(app.textFields["Barcode number"], with: "3017620422003")
+        tap(app.buttons["Look up barcode"])
+        XCTAssertFalse(app.buttons["Look up barcode"].isEnabled, "The fake request must be in flight")
+        tap(app.buttons["Enter calories or create a food"], towardTop: true)
+        let cancel = app.buttons["Cancel custom food"]
+        XCTAssertTrue(cancel.exists)
+        replace(app.textFields["What did you have?"], with: "My manual snack")
+
+        // Wait beyond the transport's ten-second response, rather than passing as
+        // soon as the form appears. The original bug replaces it with the product.
+        let interrupted = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: cancel)
+        interrupted.isInverted = true
+        XCTAssertEqual(XCTWaiter.wait(for: [interrupted], timeout: 12), .completed)
+        XCTAssertEqual(app.textFields["What did you have?"].value as? String, "My manual snack")
+        capture("Slow barcode leaves manual draft intact")
+        tap(cancel, towardTop: true)
+        reveal(app.buttons["Look up barcode"])
+        XCTAssertTrue(app.buttons["Look up barcode"].isEnabled, "Cancelling clears the old loading state")
+    }
+
+    func testBarcodeProductPersistsAndCanBeReusedOffline() {
+        launchWithBarcodeFixture("delayed-product")
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Scan barcode"])
+        replace(app.textFields["Barcode number"], with: "3017620422003")
+        tap(app.buttons["Look up barcode"])
+        XCTAssertTrue(app.staticTexts["Delayed test drink"].waitForExistence(timeout: 20), "The delayed transport must deliver through the real decoder")
+        XCTAssertTrue(app.buttons["portion.save"].isHittable)
+        expectLabel(app.staticTexts["macro.preview.after.protein"], "1 g")
+        expectLabel(app.staticTexts["macro.preview.after.carbs"], "10 g")
+        expectLabel(app.staticTexts["macro.preview.after.fat"], "0 g")
+        capture("Barcode product has known per-100-ml macros")
+        tap(app.buttons["portion.save"])
+        expectCalories("50")
+
+        // Same protected diary, but all new requests now fail deterministically.
+        app.launchEnvironment["NIBBLE_UI_TEST_BARCODE"] = "offline"
+        relaunch()
+        expectCalories("50")
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Scan barcode"])
+        replace(app.textFields["Barcode number"], with: "3017620422003")
+        tap(app.buttons["Look up barcode"])
+        reveal(app.staticTexts["You appear to be offline. Check your connection and try again."])
+        XCTAssertTrue(app.buttons["Enter the label instead"].exists)
+        capture("Offline lookup keeps manual fallback available")
+        tap(app.buttons["Find a food"], towardTop: true)
+        tap(app.buttons["Recent"])
+        tap(app.buttons["Favorite Delayed test drink"])
+        tap(app.buttons["Favorites"])
+        tap(app.buttons["Quick add Delayed test drink, per 100 ml"])
+        expectCalories("100")
+        relaunch()
+        expectCalories("100")
+    }
+
+    private func launchWithBarcodeFixture(_ fixture: String) {
+        app.terminate()
+        app.launchEnvironment["NIBBLE_UI_TEST_ID"] = UUID().uuidString
+        app.launchEnvironment["NIBBLE_UI_TEST_BARCODE"] = fixture
+        app.launch()
+        tap(app.buttons["Just start logging"])
+    }
+
     private func relaunch() {
         app.terminate()
         // Keep the same test ID: a new process must load the same saved diary.

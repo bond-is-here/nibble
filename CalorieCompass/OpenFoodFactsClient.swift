@@ -41,7 +41,7 @@ enum FoodLookupError: LocalizedError, Equatable {
 
 struct OpenFoodFactsClient {
     private let session: URLSession
-    private static let lookupSession = URLSession(configuration: lookupConfiguration())
+    private static let lookupSession = URLSession(configuration: sessionConfiguration())
 
     init(session: URLSession? = nil) {
         self.session = session ?? Self.lookupSession
@@ -57,6 +57,19 @@ struct OpenFoodFactsClient {
         configuration.httpShouldSetCookies = false
         configuration.httpCookieAcceptPolicy = .never
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        return configuration
+    }
+
+    private static func sessionConfiguration() -> URLSessionConfiguration {
+        let configuration = lookupConfiguration()
+        #if DEBUG
+        // Only a UUID-isolated UI test can replace the transport. The fixture and
+        // override do not exist in Release; no real barcode request is sent here.
+        if let value = ProcessInfo.processInfo.environment["NIBBLE_UI_TEST_ID"], UUID(uuidString: value) != nil,
+           ["delayed-product", "offline"].contains(ProcessInfo.processInfo.environment["NIBBLE_UI_TEST_BARCODE"] ?? "") {
+            configuration.protocolClasses = [UITestProductProtocol.self]
+        }
+        #endif
         return configuration
     }
 
@@ -188,6 +201,39 @@ struct OpenFoodFactsClient {
         )
     }
 }
+
+#if DEBUG
+/// Deliberately slow transport for the manual-entry cancellation regression.
+/// The response traverses the real URLSession and product decoder.
+private final class UITestProductProtocol: URLProtocol {
+    private let queue = DispatchQueue(label: "app.nibble.uitest.delayed-product")
+    private var stopped = false
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        if ProcessInfo.processInfo.environment["NIBBLE_UI_TEST_BARCODE"] == "offline" {
+            client?.urlProtocol(self, didFailWithError: URLError(.notConnectedToInternet))
+            return
+        }
+        queue.asyncAfter(deadline: .now() + 10) { [weak self] in
+            guard let self else { return }
+            guard !self.stopped, let url = self.request.url,
+                  let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1",
+                                                 headerFields: ["Content-Type": "application/json"]) else { return }
+            let data = Data(#"{"status":1,"product":{"product_name":"Delayed test drink","product_quantity_unit":"ml","nutriments":{"energy-kcal_100g":50,"proteins_100g":1,"carbohydrates_100g":10,"fat_100g":0}}}"#.utf8)
+            self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            self.client?.urlProtocol(self, didLoad: data)
+            self.client?.urlProtocolDidFinishLoading(self)
+        }
+    }
+
+    override func stopLoading() {
+        queue.async { [weak self] in self?.stopped = true }
+    }
+}
+#endif
 
 private struct OpenFoodFactsResponse: Decodable {
     let status: Int

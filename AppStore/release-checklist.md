@@ -91,14 +91,14 @@ Recheck linked requirements at the actual submission date.
 - [x] Add a shared-scheme XCTest UI target and a simulator runner, with UUID-isolated real storage enabled only in Debug builds.
 - [x] Cover fresh onboarding, quick logging, delete/Undo, portion-preview replacement, edited-entry Undo, calorie-only foods, fractional manual targets, valid/invalid macro splits, reset/cancel, and relaunch persistence.
 - [x] In [run 34178369288](https://github.com/bond-is-here/nibble/actions/runs/34178369288), three iPhone journeys passed: calorie-only foods/relaunch, live portion previews/edit/Undo, and quick logging/delete/Undo/relaunch.
-- [ ] Verify the complete UI suite after fixing its text-replacement helper: the first run inserted `30` before the existing `25` in the macro field. The manual-target/custom-split journey did not complete, so its remaining assertions are still unverified.
+- [x] Verify the complete seven-journey UI suite after fixing its text-replacement helper. The first run retained the existing `25`; the later `febc521` artifact verifies that the complete manual-target/custom-split journey now passes (evidence below).
 - [ ] Inspect the resulting iPhone screenshots, then test additional supported screen sizes and accessibility settings. Complete physical camera, signing, account, and privacy gates above before release.
 
 ## Barcode network privacy
 
 - [x] Replace the shared networking session with an ephemeral session, no HTTP cache, no cookie handling, and no credential store. Logged and favorited products still persist through the protected diary archive.
 - [x] All 1,116 local checks passed, including nine new request/configuration assertions. These verify client behavior, not provider-side retention.
-- [ ] Verify this change's iOS CI and complete the provider/contact/privacy checks above.
+- [x] Verify this change's iOS CI in the `febc521` baseline below. Provider/contact/privacy checks remain open above.
 
 ## Expanded customer-journey checks
 
@@ -106,7 +106,7 @@ Recheck linked requirements at the actual submission date.
 - [x] Fix Patterns to display `0` for an actual logged zero-calorie day; reserve `—` for a week with no logged days. Add a relaunch regression journey.
 - [x] Add iPhone journeys for rejected underage estimates and saved metric profiles, plus invalid barcode → manual macros → 200 ml portion → saved favorites.
 - [x] Pin the artifact uploader to Node-24-based v7.0.1 after CI reported the v4 runtime deprecation.
-- [ ] Run and inspect all seven UI journeys after these changes. Local checks do not substitute for the runtime assertions or screenshot review.
+- [x] Run all seven UI journeys and inspect the key resulting screenshots in the `febc521` baseline below. Local checks do not substitute for the runtime assertions or screenshot review.
 
 ## Portion-screen usability and current QA
 
@@ -128,6 +128,8 @@ Recheck linked requirements at the actual submission date.
 - [x] Add a largest-text iPhone journey with real isolated persistence, a scaling assertion, visible portion Save, and XCTest clipping/description/contrast audits. Add independent regular and SE-sized CI jobs without cancelling one on the other's failure.
 - [ ] Run and inspect both eight-journey jobs and their actual iOS screenshots after this pass. An audit of one visible screen does not certify whole-app accessibility; complete VoiceOver, intermediate text sizes, older supported iOS versions, and physical-device gates above.
 - [x] The first matrix run (`34182133064`) exposed a Debug-only compiler error: Reduce Motion is a read-only environment value. Remove the attempted test override; app behavior continues to read the real system preference. Add a Debug shared-code typecheck so test-only branches are checked locally as well. Re-run both iPhone jobs; no accessibility runtime result exists from this failed build.
+- [x] At `440c7ec`, the standard-device job in [run 34182565224](https://github.com/bond-is-here/nibble/actions/runs/34182565224) passed shared checks, both builds, and the UI-test step. Its artifact is `10039653143`, SHA-256 `63c72c529719b72d4babe4780b68df3fbe8f154c85d2929fdd987aa6bcd09a86`.
+- [ ] Inspect that artifact's exact test summary and iPhone screenshots; verify the compact job separately. Browser artifact access currently requires unlocking the Mac. A green job alone does not complete whole-app or physical-device accessibility QA.
 
 Implementation follows Apple's [Dynamic Type guidance](https://developer.apple.com/videos/play/wwdc2024/10074/) and [XCTest accessibility audit guidance](https://developer.apple.com/documentation/accessibility/performing-accessibility-audits-for-your-app). Do not treat implemented support or configured audits as a passed release gate.
 
@@ -135,5 +137,6 @@ Implementation follows Apple's [Dynamic Type guidance](https://developer.apple.c
 
 - [x] Cancel in-flight barcode work when switching to manual food entry, opening the camera, editing the typed code, leaving barcode mode, or dismissing the picker. Existing cancellation guards discard late results; a manual label draft must not be replaced by a stale product response.
 - [x] Clarify the portion caption and give the manual-label fallback a 44-point action height. All 1,128 local checks and both shared-code typechecks pass after the change.
-- [ ] Verify the follow-up iPhone run. The existing HTTP fixture suite verifies transport cancellation, but it does not exercise the timing of a manual-form switch during a slow lookup; include that scenario in device QA.
+- [x] Add two iPhone journeys with fake delayed-product/offline transports, enabled only for UUID-isolated Debug test launches. One waits beyond the response deadline and checks that a manual draft survives; the other proves the transport can deliver through the real decoder, then exercises offline failure and reuse of the saved product. The existing HTTP suite separately checks cancellation of the underlying request.
+- [ ] Verify the follow-up ten-journey iPhone run. Adding the regressions does not establish a runtime pass; live-provider and physical-camera checks remain separate.
 - [x] Refresh draft store copy to describe Macro Mix and clearly disclose that the diary is not cloud-synced or included in device backups. This remains unpublished draft metadata.
