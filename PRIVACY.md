@@ -9,7 +9,7 @@ This policy describes the Nibble iPhone app in this repository, including its mi
 Nibble stores the information you enter so it can display your diary, calculate totals and targets, and let you reuse foods:
 
 - Food names, nutrition values, portions, meal categories, dates, and saved product barcodes.
-- Custom foods, saved barcode results, favorites, and preferences such as display units and your chosen calorie target.
+- Custom foods, saved barcode results, favorites, and preferences such as display units, your chosen calorie target, and an optional protein/carbs/fat energy split.
 - If you use the estimate flow: age, height, weight, formula selection (female, male, or midpoint), activity level, direction, and goal weight. If no separate goal weight is entered, the current weight is used.
 
 The app saves these records in a JSON file at `Application Support/Nibble/diary.json` inside its app container. It has no developer-operated diary server or app cloud-sync feature. Your saved diary and body profile are not included in barcode requests or otherwise uploaded by the app. Device backups are a separate matter, described below.
@@ -17,6 +17,8 @@ The app saves these records in a JSON file at `Application Support/Nibble/diary.
 When an existing Calorie Compass installation is upgraded and no Nibble archive exists, Nibble imports the original `calorieCompass.profile`, `calorieCompass.entries`, and `calorieCompass.savedFoods` UserDefaults data. These original records are retained on the device after migration. An unreadable archive or failed migration is preserved and reported as a storage error rather than silently discarded.
 
 Nibble does not read from or write to Apple Health or HealthKit. Its locally saved nutrition and body information is app data; it is not an Apple Health database.
+
+Macro Mix, food-library suggestions, portion previews, and weekly macro summaries are calculated on the device. No AI service receives your data, and these calculations do not make network requests. A suggested food is not logged until you choose its portion and save it.
 
 ## Barcode lookups and camera access
 

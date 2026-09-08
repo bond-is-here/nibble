@@ -156,9 +156,11 @@ struct DailyTotals {
     init(entries: [FoodLogEntry] = []) {
         for entry in entries {
             calories += entry.calories
-            protein += entry.protein
-            carbs += entry.carbs
-            fat += entry.fat
+            if entry.food.hasMacros {
+                protein += entry.protein
+                carbs += entry.carbs
+                fat += entry.fat
+            }
             hasIncompleteMacros = hasIncompleteMacros || !entry.food.hasMacros
         }
     }
@@ -171,6 +173,17 @@ struct MacroTargets: Codable, Equatable {
     var fat: Double
 }
 
+struct MacroSplit: Codable, Equatable {
+    var protein: Int = 25
+    var carbs: Int = 45
+    var fat: Int = 30
+    static let standard = MacroSplit()
+    var isValid: Bool {
+        [protein, carbs, fat].allSatisfy { (1...98).contains($0) }
+        && protein + carbs + fat == 100
+    }
+}
+
 struct DiaryArchive: Codable, Equatable {
     var version = 1
     var hasStarted = false
@@ -180,6 +193,8 @@ struct DiaryArchive: Codable, Equatable {
     var savedFoods: [FoodItem] = []
     var favorites: Set<String> = []
     var units: DisplayUnits = .imperial
+    // Optional to decode every existing version-one diary unchanged.
+    var macroSplit: MacroSplit? = nil
 }
 
 extension Double {

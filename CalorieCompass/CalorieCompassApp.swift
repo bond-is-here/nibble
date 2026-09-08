@@ -2,7 +2,12 @@ import SwiftUI
 
 @main
 struct NibbleApp: App {
+    #if os(macOS)
+    // This target is a development-only native preview, never a real diary.
+    @StateObject private var appState = AppState(demo: true)
+    #else
     @StateObject private var appState = AppState(demo: CommandLine.arguments.contains("--demo"))
+    #endif
     var body: some Scene {
         #if os(macOS)
         WindowGroup("Nibble") {

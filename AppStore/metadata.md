@@ -14,7 +14,7 @@ Prepared September 5, 2026 from the current README and Swift source. This is pre
 | Primary language | English (U.S.) | Draft locale; confirm the actual app record. |
 | Platform / device family | iOS / iPhone | Project targets iPhone (`TARGETED_DEVICE_FAMILY = 1`) and portrait orientation. |
 | Minimum OS | iOS 17.0 | Runtime deployment target in the project; separate from Apple's required upload SDK. |
-| Version / build | 1.0 / 2 | Current project values; reconcile with existing App Store Connect records before upload. |
+| Version / build | 1.0 / 3 | Current project values; reconcile with existing App Store Connect records before upload. |
 | Bundle ID | com.caloriecompass.app | Retained for Calorie Compass continuity. Owner must establish registration and signing access. |
 | Copyright | Owner to supply the year and actual rights-holder name | Required field; do not infer a legal identity from the GitHub username. |
 | Age rating | Not yet determined | Complete the current questionnaire; see evidence below. |
@@ -113,6 +113,12 @@ The diary and optional body profile are saved locally. Barcode requests go to Op
 The source now includes privacy/support links under You; add that location to the review notes after the pages are public and the links have passed device verification. Do not present the macOS `--demo` preview as the submitted iPhone app or claim these flows have passed device testing. If used during development, `--demo` keeps sample data in memory; submission must be verified with a normal launch and persistent storage.
 
 ## Screenshot plan
+
+### Macro Mix additions for build 3
+
+Diary's Macro Mix opens interactive protein/carbs/fat rings, meal breakdowns, and food contributors. The mixing desk saves custom target energy percentages, preserving the calorie target and logged foods. Portion screens preview the day before/after a proposed addition or edit. Patterns includes seven-day macro proportions and known-gram averages with explicit missing-data handling. Food suggestions are on-device library rankings, not a cloud AI or clinical advice; they pause when the data or context does not support them. Include these flows in device QA and listing copy after verification.
+
+## Screenshot captures
 
 Capture the actual release-candidate iOS UI on an iPhone or iOS Simulator with fictional data. Suggested sequence: populated Diary; Find a food with favorites; a barcode product portion; Make a food; Patterns; You with the target explanation. Verify camera behavior separately on hardware.
 

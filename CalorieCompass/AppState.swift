@@ -65,10 +65,17 @@ final class AppState: ObservableObject {
     var entries: [FoodLogEntry] { archive.entries }
     var hasStarted: Bool { archive.hasStarted }
     var isPreview: Bool { isDemo }
+    var macroSplit: MacroSplit { archive.macroSplit ?? .standard }
     var targets: MacroTargets? {
-        if let calories = archive.calorieTarget { return NutritionEngine.balancedTargets(calories: calories) }
-        if let profile, profile.isValid { return NutritionEngine.targets(for: profile) }
-        return nil
+        let calories = archive.calorieTarget ?? profile.flatMap { $0.isValid ? NutritionEngine.targets(for: $0).calories : nil }
+        return calories.map { NutritionEngine.macroTargets(calories: $0, split: macroSplit) }
+    }
+    @discardableResult
+    func setMacroSplit(_ split: MacroSplit) -> Bool {
+        guard split.isValid else { return false }
+        var next = archive
+        next.macroSplit = split == .standard ? nil : split
+        return commit(next)
     }
     var selectedEntries: [FoodLogEntry] { entries(on: selectedDate) }
     var selectedTotals: DailyTotals { DailyTotals(entries: selectedEntries) }
@@ -210,6 +217,7 @@ final class AppState: ObservableObject {
     private static func isValid(_ data: DiaryArchive) -> Bool {
         data.version == 1
         && (data.profile.map(\.isValid) ?? true)
+        && (data.macroSplit.map(\.isValid) ?? true)
         && (data.calorieTarget.map { $0.isFinite && (1000...6000).contains($0) } ?? true)
         && data.entries.allSatisfy {
             $0.food.isValid && $0.date.timeIntervalSince1970.isFinite

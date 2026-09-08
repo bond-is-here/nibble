@@ -9,6 +9,7 @@ struct DashboardView: View {
     @State private var editingEntry: FoodLogEntry?
     @State private var selectedFood: FoodItem?
     @State private var mascotTilt = false
+    @State private var macroFocus: MacroKind?
     private var totals: DailyTotals { appState.selectedTotals }
     private var target: Double? { appState.targets?.calories }
     private var week: [Date] {
@@ -21,7 +22,7 @@ struct DashboardView: View {
                 header
                 dates
                 calorieCard
-                macroRow
+                MacroMixCard(snapshot: MacroSnapshot(entries: appState.selectedEntries, targets: appState.targets)) { macroFocus = $0 }
                 usuals
                 diary
                 HStack {
@@ -49,6 +50,7 @@ struct DashboardView: View {
         .sheet(item: $selectedFood) { food in
             FoodPortionView(food: food, initialMeal: .suggested()).phoneSheet()
         }
+        .sheet(item: $macroFocus) { macro in MacroMixView(initialFocus: macro).phoneSheet() }
     }
 
     private var header: some View {
@@ -144,19 +146,6 @@ struct DashboardView: View {
         }
         .foregroundStyle(Color.ink)
         .padding(23).background(Color.lime, in: RoundedRectangle(cornerRadius: 30))
-    }
-
-    private var macroRow: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 9) {
-                MacroTile(name: "Protein", value: totals.protein, target: appState.targets?.protein, color: .peach, icon: "bolt")
-                MacroTile(name: "Carbs", value: totals.carbs, target: appState.targets?.carbs, color: .lilac, icon: "sparkle")
-                MacroTile(name: "Fat", value: totals.fat, target: appState.targets?.fat, color: .fog, icon: "drop")
-            }
-            if totals.hasIncompleteMacros {
-                Text("Macros are partial. Some entries track calories only.").font(.system(size: 10)).foregroundStyle(Color.muted)
-            }
-        }
     }
 
     private var usuals: some View {

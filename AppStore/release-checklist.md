@@ -66,3 +66,12 @@ Use the [latest workflow result](https://github.com/bond-is-here/nibble/actions/
 - [ ] Upload the validated signed build, finish privacy/age-rating/contact fields, and submit only after all gates pass. Record Apple's review outcome; submission is not approval or availability.
 
 Recheck linked requirements at the actual submission date.
+
+## Macro Mix update — build 3
+
+- [x] Macro rings/details, saved split editor, local suggestion engine, portion preview, and weekly macro patterns implemented.
+- [x] Local shared SwiftUI typecheck, existing 750 assertions/checks, and 329 new Macro Mix checks passed.
+- [x] Native macOS design previews rendered and visually inspected. These remain design previews, not iOS screenshots.
+- [ ] Verify this update's full iOS build and runtime after completing Xcode's first-launch license/setup. Prior CI evidence above covers build 2, not these new changes.
+- [ ] Test tap-to-explore, switching macro focus, save/cancel/reset/invalid splits, scaled gram targets, partial/no-target/history states, and suggestions → portion → save on iPhone.
+- [ ] Verify existing-diary upgrade, reduced motion, small screens, larger text, and VoiceOver. Recheck all earlier release/privacy gates; this update does not resolve them automatically.

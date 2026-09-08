@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A20100010000000000000001 /* MacroEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20100010000000000000001 /* MacroEngine.swift */; };
+		A20100010000000000000002 /* MacroMixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20100010000000000000002 /* MacroMixView.swift */; };
 		A10100010000000000000001 /* CalorieCompassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000001 /* CalorieCompassApp.swift */; };
 		A10100010000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000002 /* ContentView.swift */; };
 		A10100010000000000000003 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10100010000000000000003 /* Theme.swift */; };
@@ -25,6 +27,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B20100010000000000000001 /* MacroEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroEngine.swift; sourceTree = "<group>"; };
+		B20100010000000000000002 /* MacroMixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroMixView.swift; sourceTree = "<group>"; };
 		B10100010000000000000001 /* CalorieCompassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieCompassApp.swift; sourceTree = "<group>"; };
 		B10100010000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B10100010000000000000003 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -80,6 +84,8 @@
 				B1010001000000000000000D /* BarcodeScannerView.swift */,
 				B1010001000000000000000F /* Assets.xcassets */,
 				B10100010000000000000010 /* PrivacyInfo.xcprivacy */,
+				B20100010000000000000001 /* MacroEngine.swift */,
+				B20100010000000000000002 /* MacroMixView.swift */,
 			);
 			path = CalorieCompass;
 			sourceTree = "<group>";
@@ -169,6 +175,8 @@
 				A1010001000000000000000B /* AddFoodView.swift in Sources */,
 				A1010001000000000000000C /* ProfileView.swift in Sources */,
 				A1010001000000000000000D /* BarcodeScannerView.swift in Sources */,
+				A20100010000000000000001 /* MacroEngine.swift in Sources */,
+				A20100010000000000000002 /* MacroMixView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -181,7 +189,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Nibble;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Nibble uses the camera to read the barcode on a food package.";
@@ -210,7 +218,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Nibble;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Nibble uses the camera to read the barcode on a food package.";

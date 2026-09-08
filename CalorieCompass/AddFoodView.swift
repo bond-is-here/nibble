@@ -301,7 +301,7 @@ struct FoodPortionView: View {
                         HStack(spacing: 8) {
                             portionMacro("Protein", value: food.protein, color: .peach)
                             portionMacro("Carbs", value: food.carbs, color: .lilac)
-                            portionMacro("Fat", value: food.fat, color: .fog)
+                            portionMacro("Fat", value: food.fat, color: .lime)
                         }
                     } else {
                         Text("Calories-only entry. Macros aren’t included.").font(.system(size: 12)).foregroundStyle(Color.muted)
@@ -309,6 +309,7 @@ struct FoodPortionView: View {
                 }
                 if let error { InlineMessage(text: error) }
                 if let storageError = appState.storageError { InlineMessage(text: storageError) }
+                if let servings { MacroPortionPreview(food: food, servings: servings, entry: entry) }
                 NibbleButton(title: entry == nil ? "Add to \(meal.title.lowercased())" : "Save changes", icon: "checkmark") {
                     guard let servings else { error = "Enter an amount above zero, up to 100 servings."; return }
                     let saved: Bool
