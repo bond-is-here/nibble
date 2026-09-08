@@ -29,7 +29,7 @@ struct OnboardingView: View {
                 if setup { setupContent } else { welcome }
             }.padding(25).frame(maxWidth: 480)
                 .frame(maxWidth: .infinity, alignment: .top)
-        }.background(Color.canvas)
+        }.background(Color.canvas).scrollDismissesKeyboard(.interactively)
             .onAppear(perform: load)
     }
 

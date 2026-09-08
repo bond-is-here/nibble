@@ -1,0 +1,167 @@
+import XCTest
+
+/// These journeys use the real SwiftUI app and its protected on-device JSON store.
+/// No live barcode service, credentials, or customer diary is used.
+@MainActor
+final class NibbleUITests: XCTestCase {
+    private var app: XCUIApplication!
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchEnvironment["NIBBLE_UI_TEST_ID"] = UUID().uuidString
+        app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launch()
+        tap(app.buttons["Just start logging"])
+        expectCalories("0")
+    }
+
+    override func tearDownWithError() throws {
+        if let app {
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = name
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            app.terminate()
+        }
+    }
+
+    func testQuickLoggingPersistsAndCanBeDeletedAndUndone() {
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Quick add Greek yogurt, 1 cup"])
+        expectCalories("150")
+        relaunch()
+        expectCalories("150")
+
+        tap(app.buttons["Options for Greek yogurt"])
+        tap(app.buttons["Delete"])
+        XCTAssertFalse(app.buttons["Edit Greek yogurt, 150 calories"].exists)
+        // Undo is intentionally time-limited; exercise it before navigating away.
+        tap(app.buttons["Undo"])
+        expectCalories("150", towardTop: true)
+        relaunch()
+        expectCalories("150")
+    }
+
+    func testPortionPreviewReplacesExistingEntryAndUndoRestoresIt() {
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Choose Greek yogurt, 1 cup, 150 calories"])
+        tap(app.buttons["2 servings"])
+        expectLabel(app.staticTexts["macro.preview.after.protein"], "40 g")
+        expectLabel(app.staticTexts["macro.preview.after.carbs"], "16 g")
+        expectLabel(app.staticTexts["macro.preview.after.fat"], "8 g")
+        tap(app.buttons["portion.save"])
+        expectCalories("300")
+
+        tap(app.buttons["Edit Greek yogurt, 300 calories"])
+        tap(app.buttons["0.5 servings"])
+        expectLabel(app.staticTexts["macro.preview.after.protein"], "10 g")
+        expectLabel(app.staticTexts["macro.preview.after.carbs"], "4 g")
+        expectLabel(app.staticTexts["macro.preview.after.fat"], "2 g")
+        tap(app.buttons["portion.save"])
+        XCTAssertTrue(app.buttons["Edit Greek yogurt, 75 calories"].exists)
+        tap(app.buttons["Undo"])
+        expectCalories("300", towardTop: true)
+        relaunch()
+        expectCalories("300")
+    }
+
+    func testManualTargetAndCustomMacroMixSurviveRelaunch() {
+        tap(app.buttons["You"])
+        tap(app.buttons["Tune my plan"])
+        tap(app.buttons["Set my own"])
+        replace(app.textFields["Daily calorie target"], with: "2000.5")
+        tap(app.buttons["Save my plan"])
+        tap(app.buttons["Tune my plan"])
+        XCTAssertEqual(app.textFields["Daily calorie target"].value as? String, "2000.5")
+        tap(app.buttons["Close setup"], towardTop: true)
+
+        tap(app.buttons["macro.edit"])
+        replace(app.textFields["Protein target percentage"], with: "30")
+        reveal(app.buttons["Save my mix"])
+        XCTAssertFalse(app.buttons["Save my mix"].isEnabled, "A 105% split must not save")
+        replace(app.textFields["Carbs target percentage"], with: "40", towardTop: true)
+        tap(app.buttons["Save my mix"])
+        XCTAssertEqual(app.buttons["macro.edit"].label, "Tune macro mix · 30/40/30")
+
+        relaunch()
+        tap(app.buttons["You"])
+        tap(app.buttons["Tune my plan"])
+        XCTAssertEqual(app.textFields["Daily calorie target"].value as? String, "2000.5")
+        tap(app.buttons["Close setup"], towardTop: true)
+        tap(app.buttons["macro.edit"])
+        XCTAssertEqual(app.textFields["Protein target percentage"].value as? String, "30")
+        XCTAssertEqual(app.textFields["Carbs target percentage"].value as? String, "40")
+        XCTAssertEqual(app.textFields["Fat target percentage"].value as? String, "30")
+        tap(app.buttons["Reset draft to 25 / 45 / 30"])
+        tap(app.buttons["Cancel macro changes"], towardTop: true)
+        XCTAssertEqual(app.buttons["macro.edit"].label, "Tune macro mix · 30/40/30", "Cancel must discard the reset draft")
+    }
+
+    func testCalorieOnlyFoodDoesNotInventMacros() {
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Enter calories or create a food"])
+        replace(app.textFields["What did you have?"], with: "Mystery soup")
+        replace(app.textFields["Calories"], with: "275")
+        tap(app.buttons["Choose a portion"])
+        expectLabel(app.staticTexts["macro.preview.after.protein"], "—")
+        expectLabel(app.staticTexts["macro.preview.after.carbs"], "—")
+        expectLabel(app.staticTexts["macro.preview.after.fat"], "—")
+        tap(app.buttons["portion.save"])
+        expectCalories("275")
+        tap(app.buttons["Explore your macro mix"])
+        reveal(app.staticTexts["A few pieces are missing."])
+        XCTAssertTrue(app.staticTexts["A few pieces are missing."].exists)
+        tap(app.buttons["Close macro mix"], towardTop: true)
+        relaunch()
+        expectCalories("275")
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Recent"])
+        XCTAssertTrue(app.buttons["Choose Mystery soup, 1 serving, 275 calories"].waitForExistence(timeout: 5))
+    }
+
+    private func relaunch() {
+        app.terminate()
+        // Keep the same test ID: a new process must load the same saved diary.
+        app.launch()
+        XCTAssertTrue(app.buttons["Add food"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["Just start logging"].exists)
+    }
+
+    private func expectCalories(_ value: String, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+        expectLabel(app.staticTexts["diary.calories"], value, towardTop: towardTop, file: file, line: line)
+    }
+
+    private func expectLabel(_ element: XCUIElement, _ value: String, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+        reveal(element, towardTop: towardTop, file: file, line: line)
+        let expected = NSPredicate(format: "label == %@", value)
+        let result = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: expected, object: element)], timeout: 5)
+        XCTAssertEqual(result, .completed, "Expected \(value), found \(element.label)", file: file, line: line)
+    }
+
+    private func replace(_ field: XCUIElement, with value: String, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+        reveal(field, towardTop: towardTop, file: file, line: line)
+        field.tap()
+        let previous = field.value as? String ?? ""
+        let text = previous == field.placeholderValue ? "" : previous
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: text.count) + value)
+        XCTAssertEqual(field.value as? String, value, file: file, line: line)
+    }
+
+    private func tap(_ element: XCUIElement, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+        reveal(element, towardTop: towardTop, file: file, line: line)
+        XCTAssertTrue(element.isEnabled, "Control must be enabled", file: file, line: line)
+        element.tap()
+    }
+
+    private func reveal(_ element: XCUIElement, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+        _ = element.waitForExistence(timeout: 3)
+        for _ in 0..<8 {
+            if element.exists && element.isHittable { return }
+            let scroll = app.scrollViews.firstMatch
+            guard scroll.exists else { break }
+            if towardTop { scroll.swipeDown() } else { scroll.swipeUp() }
+        }
+        XCTAssertTrue(element.exists && element.isHittable, "Control is not reachable: \(element)\n\(app.debugDescription)", file: file, line: line)
+    }
+}

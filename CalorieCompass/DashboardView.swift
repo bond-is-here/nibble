@@ -112,6 +112,7 @@ struct DashboardView: View {
             HStack(alignment: .center, spacing: 0) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(totals.calories.whole)
+                        .accessibilityIdentifier("diary.calories")
                         .font(.system(size: 62, weight: .medium, design: .rounded)).tracking(-4)
                         .lineLimit(1).minimumScaleFactor(0.7).contentTransition(.numericText())
                     Text("calories enjoyed").font(.system(size: 13, weight: .medium)).foregroundStyle(Color.ink.opacity(0.7))

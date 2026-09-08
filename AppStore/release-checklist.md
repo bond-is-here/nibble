@@ -82,4 +82,12 @@ Recheck linked requirements at the actual submission date.
 - [x] Exclude the Nibble folder from backups before storing health data; use complete file protection for iOS writes and existing files.
 - [x] Preserve and verify original legacy property-list values in protected recovery storage before removing the three UserDefaults values. Interrupted cleanup resumes, malformed records stay recoverable, and existing JSON takes precedence.
 - [x] All 1,079 diary/barcode/macro assertions and 28 protected-storage checks passed locally, including failed writes, migration retries, actual backup-exclusion metadata, and demo isolation.
-- [ ] Confirm this commit's iOS CI, then verify protection during physical-device lock/unlock and backup. These local checks do not exercise iOS data-protection behavior.
+- [x] Storage commit `bd1ac48` passed all shared checks and both iOS builds in [CI run 34177621406](https://github.com/bond-is-here/nibble/actions/runs/34177621406).
+- [ ] Verify protection during physical-device lock/unlock and backup. Local and build-only checks do not exercise physical iOS data-protection behavior.
+
+## iPhone runtime regression tests
+
+- [x] Add a shared-scheme XCTest UI target and a simulator runner, with UUID-isolated real storage enabled only in Debug builds.
+- [x] Cover fresh onboarding, quick logging, delete/Undo, portion-preview replacement, edited-entry Undo, calorie-only foods, fractional manual targets, valid/invalid macro splits, reset/cancel, and relaunch persistence.
+- [ ] Verify the new UI suite actually passes on CI; implementation and compilation alone do not prove these journeys work.
+- [ ] Inspect the resulting iPhone screenshots, then test additional supported screen sizes and accessibility settings. Complete physical camera, signing, account, and privacy gates above before release.

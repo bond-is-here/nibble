@@ -49,6 +49,14 @@ bash Tools/check.sh
 
 Checks project metadata, shared SwiftUI code, diary/storage behavior, nutrition arithmetic, and barcode decoding/HTTP failures. The Macro Mix suite covers coverage, energy shares, suggestion eligibility/ranking, live portion previews, DST-safe weekly grouping, old-archive compatibility, and transactional preference storage. Executable tests need no third-party dependencies.
 
+With full Xcode and an installed iPhone Simulator runtime:
+
+```sh
+bash Tools/test-ios.sh
+```
+
+The `NibbleUITests` target drives onboarding, quick logging, delete/Undo, portion previews and editing, custom calorie-only foods, manual targets, custom macro splits, and persistence across process relaunches. Each test gets a unique UUID-scoped diary and defaults suite through a **Debug-only** launch hook. Normal diaries are never erased or reused. Results, logs, and final-screen attachments are retained under `.build/ui-run.*`; set `NIBBLE_SIMULATOR_ID` to test another installed simulator. The script requires `jq` for automatic simulator selection. Tests use local foods, not the live barcode service.
+
 Optional live network check:
 
 ```sh
@@ -56,7 +64,7 @@ swiftc -swift-version 5 CalorieCompass/Models.swift CalorieCompass/OpenFoodFacts
 .build/live-barcode 3017620422003
 ```
 
-The [GitHub Actions workflow](https://github.com/bond-is-here/nibble/actions/workflows/ios.yml) runs on a standard macOS 26 runner and checks for an iOS 26+ SDK, runs the test suite, and builds both the iPhone Simulator Debug and unsigned iPhone Release configurations. The initial app passed all of these checks in [run 34000992086](https://github.com/bond-is-here/nibble/actions/runs/34000992086). This is build validation, not on-device UI/camera testing or a signed distributable build. Local shared-code checks and a Mac preview are available through Command Line Tools; full iPhone builds require Xcode’s first-launch license/setup and an iPhone SDK.
+The [GitHub Actions workflow](https://github.com/bond-is-here/nibble/actions/workflows/ios.yml) runs on a standard macOS 26 runner and checks for an iOS 26+ SDK, runs the shared checks, builds both the iPhone Simulator Debug and unsigned iPhone Release configurations, and runs the iPhone UI journeys. UI results are retained as a workflow artifact for seven days, including failed runs. Check the latest run for actual results; configuring tests is not evidence they passed. The original build-only checks passed in [run 34000992086](https://github.com/bond-is-here/nibble/actions/runs/34000992086). Simulator tests do not prove physical camera behavior, accessibility across devices, or signed distribution readiness. Local shared-code checks and a Mac preview are available through Command Line Tools; full iPhone builds require Xcode’s first-launch license/setup and an iPhone SDK.
 
 ## App Store preparation
 

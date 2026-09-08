@@ -298,7 +298,7 @@ struct MacroSplitEditor: View {
                 Text("This is a planning preference, not a nutrition prescription. These percentages describe energy, not food weight. Changing the mix doesn’t change foods you’ve logged. Historical comparisons use your current plan.")
                     .font(.system(size: 12)).foregroundStyle(Color.muted).lineSpacing(3)
             }.padding(24).foregroundStyle(Color.ink)
-        }.background(Color.canvas)
+        }.background(Color.canvas).scrollDismissesKeyboard(.interactively)
             .onAppear {
                 protein = String(appState.macroSplit.protein)
                 carbs = String(appState.macroSplit.carbs)
@@ -381,6 +381,7 @@ struct MacroPortionPreview: View {
                         Image(systemName: "arrow.right").font(.system(size: 9))
                         Text(after.knownCount == 0 ? "—" : macro.grams(in: after.totals).compact + " g")
                             .fontWeight(.semibold)
+                            .accessibilityIdentifier("macro.preview.after.\(macro.rawValue)")
                     }.font(.system(size: 12, design: .rounded))
                 }
                 Text(after.isPartial ? "Known grams only. Calorie-only bites remain unknown." : "Preview only. Nothing is logged until you save.")

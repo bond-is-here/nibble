@@ -318,12 +318,12 @@ struct FoodPortionView: View {
                     if saved {
                         if let onLogged { onLogged() } else { dismiss() }
                     }
-                }.opacity(servings == nil ? 0.5 : 1)
+                }.opacity(servings == nil ? 0.5 : 1).accessibilityIdentifier("portion.save")
                 if food.source == .openFoodFacts {
                     Text("From Open Food Facts · check the label.").font(.system(size: 10)).foregroundStyle(Color.muted)
                 }
             }.foregroundStyle(Color.ink).padding(24)
-        }.background(Color.canvas)
+        }.background(Color.canvas).scrollDismissesKeyboard(.interactively)
     }
 
     private func close() { if let onClose { onClose() } else { dismiss() } }
@@ -380,7 +380,7 @@ private struct CustomFoodView: View {
                 NibbleButton(title: "Choose a portion", icon: "arrow.right", action: create)
                 Text("Saved automatically when you log it.").font(.system(size: 11)).foregroundStyle(Color.muted)
             }.padding(24).foregroundStyle(Color.ink)
-        }.background(Color.canvas)
+        }.background(Color.canvas).scrollDismissesKeyboard(.interactively)
     }
 
     private func create() {

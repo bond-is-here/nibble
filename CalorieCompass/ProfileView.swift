@@ -41,7 +41,7 @@ struct ProfileView: View {
                     Button { showMacroEditor = true } label: {
                         Label("Tune macro mix · \(appState.macroSplit.protein)/\(appState.macroSplit.carbs)/\(appState.macroSplit.fat)", systemImage: "circle.hexagongrid")
                             .font(.system(size: 13, weight: .semibold)).frame(minHeight: 44)
-                    }.buttonStyle(.plain)
+                    }.buttonStyle(.plain).accessibilityIdentifier("macro.edit")
                 }.cardSurface(.lime)
                 if let profile = appState.profile {
                     VStack(alignment: .leading, spacing: 17) {
