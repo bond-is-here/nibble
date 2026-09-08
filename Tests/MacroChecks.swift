@@ -13,9 +13,9 @@ struct MacroChecks {
         try check(actual.isFinite && abs(actual - expected) < 0.000_001, message)
     }
     static func food(_ name: String = "Sample", calories: Double = 200, p: Double = 20, c: Double = 20,
-                     f: Double = 5, known: Bool = true) -> FoodItem {
+                     f: Double = 5, known: Bool = true, barcode: String? = nil) -> FoodItem {
         FoodItem(name: name, servingText: "1 serving", calories: calories, protein: p, carbs: c, fat: f,
-                 source: .custom, macrosComplete: known)
+                 barcode: barcode, source: .custom, macrosComplete: known)
     }
     static func log(_ food: FoodItem, amount: Double = 1, day: Date = Date()) -> FoodLogEntry {
         FoodLogEntry(date: day, meal: .lunch, food: food, servings: amount)
@@ -93,6 +93,14 @@ struct MacroChecks {
         let twin = food("Twin", calories: 150, p: 25, c: 5, f: 2)
         let favorites = MacroEngine.insight(snapshot: snapshot, foods: [good, twin], favorites: [twin.stableKey], isToday: true)
         try check(favorites.suggestions.first?.food == twin, "Favorite wins an equal-score tie")
+        let upc = food("UPC cereal", calories: 150, p: 25, c: 5, f: 2, barcode: "036000291452")
+        let ean = food("EAN cereal", calories: 150, p: 25, c: 5, f: 2, barcode: "0036000291452")
+        try check(upc.stableKey == ean.stableKey && upc.stableKey == "barcode:00036000291452",
+                  "UPC-A and zero-prefixed EAN-13 share a validated GTIN identity")
+        let legacyFavorite = MacroEngine.insight(snapshot: snapshot, foods: [good, ean],
+                                                  favorites: ["barcode:036000291452"], isToday: true)
+        try check(legacyFavorite.suggestions.first?.food == ean,
+                  "Legacy literal barcode favorites still break suggestion ties")
         let many = (0..<9).map { food("Food \($0)", calories: 150, p: 25, c: 5, f: 2) }
         let top = MacroEngine.insight(snapshot: snapshot, foods: many, isToday: true)
         try check(top.suggestions.count == 3, "Keep choices small")

@@ -99,6 +99,8 @@ struct UserProfile: Codable, Equatable {
 }
 
 struct FoodItem: Codable, Equatable, Identifiable {
+    private static let gtinLengths = [8, 12, 13, 14]
+
     var id: UUID = UUID()
     var name: String
     var brand: String?
@@ -117,7 +119,47 @@ struct FoodItem: Codable, Equatable, Identifiable {
         return basis == "100g" || basis == "100ml"
     }
     var quantityUnit: String { isPerHundred ? (servingText.lowercased().contains("ml") ? "ml" : "g") : "servings" }
-    var stableKey: String { barcode.map { "barcode:\($0)" } ?? "\(name.lowercased())|\(servingText.lowercased())" }
+    /// The barcode remains unchanged for storage and requests; only its identity is
+    /// canonicalized when it is an exact, valid GTIN representation.
+    var stableKey: String {
+        if let barcode, let canonical = Self.canonicalBarcode(barcode) {
+            return "barcode:\(canonical)"
+        }
+        return barcode.map { "barcode:\($0)" } ?? "\(name.lowercased())|\(servingText.lowercased())"
+    }
+
+    /// Includes the pre-canonical literal keys so old favorites remain readable.
+    /// Only valid shorter representations of this same zero-padded GTIN are added;
+    /// this avoids treating invalid legacy values or nonzero GTIN-14 indicators as
+    /// aliases of another product.
+    var favoriteKeys: Set<String> {
+        guard let barcode, let canonical = Self.canonicalBarcode(barcode) else {
+            return [stableKey]
+        }
+
+        let canonicalDigits = Array(canonical.utf8)
+        var keys = Set(["barcode:\(barcode)", "barcode:\(canonical)"])
+        for length in Self.gtinLengths {
+            let prefixLength = 14 - length
+            guard canonicalDigits.prefix(prefixLength).allSatisfy({ $0 == 48 }) else { continue }
+            let representation = String(decoding: canonicalDigits.suffix(length), as: UTF8.self)
+            guard Self.canonicalBarcode(representation) == canonical else { continue }
+            keys.insert("barcode:\(representation)")
+        }
+        return keys
+    }
+
+    private static func canonicalBarcode(_ barcode: String) -> String? {
+        let digits = Array(barcode.utf8)
+        guard gtinLengths.contains(digits.count), digits.allSatisfy({ (48...57).contains($0) }),
+              digits.contains(where: { $0 != 48 }) else { return nil }
+
+        let checksum = digits.reversed().enumerated().reduce(0) { sum, element in
+            sum + Int(element.element - 48) * (element.offset.isMultiple(of: 2) ? 1 : 3)
+        }
+        guard checksum.isMultiple(of: 10) else { return nil }
+        return String(repeating: "0", count: 14 - digits.count) + barcode
+    }
     var shortNutrition: String { "\(calories.whole) cal · \(protein.whole)g protein" }
     var isValid: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !servingText.isEmpty

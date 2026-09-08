@@ -142,7 +142,8 @@ enum MacroEngine {
         }.sorted {
             // Exact score ordering stays transitive, including very close scores.
             if $0.score != $1.score { return $0.score > $1.score }
-            let a = favorites.contains($0.id), b = favorites.contains($1.id)
+            let a = !$0.food.favoriteKeys.isDisjoint(with: favorites)
+            let b = !$1.food.favoriteKeys.isDisjoint(with: favorites)
             return a == b ? $0.id < $1.id : a
         }
         return ranked.isEmpty ? message(.noMatch) : MacroInsight(nudge: .explore(focus), suggestions: Array(ranked.prefix(3)))
