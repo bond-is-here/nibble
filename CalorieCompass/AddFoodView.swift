@@ -307,23 +307,32 @@ struct FoodPortionView: View {
                         Text("Calories-only entry. Macros aren’t included.").font(.system(size: 12)).foregroundStyle(Color.muted)
                     }
                 }
-                if let error { InlineMessage(text: error) }
-                if let storageError = appState.storageError { InlineMessage(text: storageError) }
                 if let servings { MacroPortionPreview(food: food, servings: servings, entry: entry) }
-                NibbleButton(title: entry == nil ? "Add to \(meal.title.lowercased())" : "Save changes", icon: "checkmark") {
-                    guard let servings else { error = "Enter an amount above zero, up to 100 servings."; return }
-                    let saved: Bool
-                    if let entry { saved = appState.editEntry(entry, meal: meal, servings: servings) }
-                    else { saved = appState.addEntry(food: food, meal: meal, servings: servings) }
-                    if saved {
-                        if let onLogged { onLogged() } else { dismiss() }
-                    }
-                }.opacity(servings == nil ? 0.5 : 1).accessibilityIdentifier("portion.save")
                 if food.source == .openFoodFacts {
                     Text("From Open Food Facts · check the label.").font(.system(size: 10)).foregroundStyle(Color.muted)
                 }
             }.foregroundStyle(Color.ink).padding(24)
         }.background(Color.canvas).scrollDismissesKeyboard(.interactively)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 10) {
+                    if let error { InlineMessage(text: error) }
+                    if let storageError = appState.storageError { InlineMessage(text: storageError) }
+                    NibbleButton(title: entry == nil ? "Add to \(meal.title.lowercased())" : "Save changes", icon: "checkmark", action: save)
+                        .opacity(servings == nil ? 0.5 : 1).accessibilityIdentifier("portion.save")
+                }.padding(.horizontal, 24).padding(.vertical, 12).background(Color.canvas)
+                    .overlay(alignment: .top) { Color.line.frame(height: 1) }
+            }
+            .onChange(of: amount) { _, _ in error = nil }
+    }
+
+    private func save() {
+        guard let servings else { error = "Enter an amount above zero, up to 100 servings."; return }
+        let saved: Bool
+        if let entry { saved = appState.editEntry(entry, meal: meal, servings: servings) }
+        else { saved = appState.addEntry(food: food, meal: meal, servings: servings) }
+        if saved {
+            if let onLogged { onLogged() } else { dismiss() }
+        }
     }
 
     private func close() { if let onClose { onClose() } else { dismiss() } }

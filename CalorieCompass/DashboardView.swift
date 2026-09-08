@@ -107,7 +107,7 @@ struct DashboardView: View {
             HStack {
                 Eyebrow(text: "Your daily bite", color: .ink)
                 Spacer()
-                Text("✳").font(.system(size: 20)).foregroundStyle(Color.ink)
+                Image(systemName: "sparkle").font(.system(size: 20)).foregroundStyle(Color.ink).accessibilityHidden(true)
             }
             HStack(alignment: .center, spacing: 0) {
                 VStack(alignment: .leading, spacing: 1) {

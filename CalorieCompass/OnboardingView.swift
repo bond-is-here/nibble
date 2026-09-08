@@ -50,7 +50,7 @@ struct OnboardingView: View {
                 Text("big little wins.").font(.system(size: 12, weight: .medium, design: .monospaced))
                     .padding(.horizontal, 15).padding(.vertical, 10).background(.white, in: Capsule())
                     .rotationEffect(.degrees(-6)).offset(x: -64, y: 106)
-                Text("✳").font(.system(size: 44)).offset(x: -132, y: -69)
+                Image(systemName: "sparkle").font(.system(size: 44)).offset(x: -132, y: -69).accessibilityHidden(true)
             }.frame(maxWidth: .infinity).frame(height: 300).padding(.top, 10)
             VStack(alignment: .leading, spacing: 13) {
                 Text("Less logging.\nMore living.")

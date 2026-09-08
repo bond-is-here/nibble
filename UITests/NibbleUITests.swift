@@ -43,6 +43,7 @@ final class NibbleUITests: XCTestCase {
     func testPortionPreviewReplacesExistingEntryAndUndoRestoresIt() {
         tap(app.buttons["Add food"])
         tap(app.buttons["Choose Greek yogurt, 1 cup, 150 calories"])
+        XCTAssertTrue(app.buttons["portion.save"].isHittable, "Saving must be available without scrolling the portion screen")
         tap(app.buttons["2 servings"])
         expectLabel(app.staticTexts["macro.preview.after.protein"], "40 g")
         expectLabel(app.staticTexts["macro.preview.after.carbs"], "16 g")
@@ -135,11 +136,11 @@ final class NibbleUITests: XCTestCase {
         tap(app.buttons["Save my plan"])
         // The midpoint formula at 170 cm / 70 kg / 30 years, light activity,
         // and maintenance rounds to 2,100 calories. No body data is sent anywhere.
-        expectLabel(app.staticTexts["plan.calories"], "2100")
+        expectLabel(app.staticTexts["plan.calories"], "2,100")
         capture("Estimated plan from metric profile")
         relaunch()
         tap(app.buttons["You"])
-        expectLabel(app.staticTexts["plan.calories"], "2100")
+        expectLabel(app.staticTexts["plan.calories"], "2,100")
         tap(app.buttons["Tune my plan"])
         XCTAssertEqual(app.textFields["Height"].value as? String, "170")
         XCTAssertEqual(app.textFields["Weight"].value as? String, "70")
@@ -226,16 +227,22 @@ final class NibbleUITests: XCTestCase {
     private func replace(_ field: XCUIElement, with value: String, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         reveal(field, towardTop: towardTop, file: file, line: line)
         field.tap()
-        // XCTest may expose placeholder text as value on an empty field. It is
-        // safe to backspace an empty field; it is not safe to assume equal text
-        // means empty (the macro editor's real initial value AND placeholder are 25).
+        // A right-aligned field can retain an insertion point before its text,
+        // even after tapping the trailing edge. Select its contents explicitly;
+        // deleting at an assumed caret position silently left "25" behind.
         let text = field.value as? String ?? ""
-        if !text.isEmpty {
-            // A center tap can place the caret before right-aligned percentages.
-            // Move to the trailing edge before deleting the existing value.
-            field.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+        if field.label.hasSuffix("target percentage") {
+            field.press(forDuration: 1.2)
+            let selectAll = app.descendants(matching: .any).matching(identifier: "Select All").firstMatch
+            XCTAssertTrue(selectAll.waitForExistence(timeout: 3), "The percentage must be selected before replacement", file: file, line: line)
+            selectAll.tap()
+            field.typeText(value)
+        } else {
+            if !text.isEmpty {
+                field.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+            }
+            field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: text.count) + value)
         }
-        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: text.count) + value)
         XCTAssertEqual(field.value as? String, value, file: file, line: line)
     }
 

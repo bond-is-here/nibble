@@ -107,3 +107,12 @@ Recheck linked requirements at the actual submission date.
 - [x] Add iPhone journeys for rejected underage estimates and saved metric profiles, plus invalid barcode → manual macros → 200 ml portion → saved favorites.
 - [x] Pin the artifact uploader to Node-24-based v7.0.1 after CI reported the v4 runtime deprecation.
 - [ ] Run and inspect all seven UI journeys after these changes. Local checks do not substitute for the runtime assertions or screenshot review.
+
+## Portion-screen usability and current QA
+
+- [x] Inspect actual iPhone Air screenshots from run `34179135984`: diary totals, calorie-only macro state, and two-serving preview. The preview's Save button was below the initial viewport.
+- [x] Move the portion Save action and validation feedback into a bottom safe-area bar; add an assertion that Save is reachable before scrolling. Keep the nutrition details scrollable.
+- [x] Replace decorative text symbols that rendered as green emoji tiles on iOS with accessibility-hidden SF Symbols.
+- [x] In [run 34179784015](https://github.com/bond-is-here/nibble/actions/runs/34179784015), shared checks and both iOS builds passed. The expanded UI run failed on the estimate's formatted `2,100` label and the macro field's retained `25` during replacement. Neither incomplete journey is certified.
+- [x] Correct the locale-specific display expectation and use the iOS Select All editing action for percentage replacement instead of assuming the caret position.
+- [ ] Verify the new commit's complete simulator result and inspect its sticky-button screenshots. Physical-device, accessibility, privacy, signing, and account gates remain open.
