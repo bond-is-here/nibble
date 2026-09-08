@@ -369,23 +369,22 @@ final class NibbleUITests: XCTestCase {
             return
         }
 
-        // Choose a direction once. A target already above the viewport needs a
-        // downward drag; otherwise use the caller's explicit towardTop intent
-        // or search down the content. Short coordinate drags avoid the large
-        // jumps and bounce-back that full swipeUp/swipeDown gestures create on
-        // compact devices.
-        let targetFrame = element.frame
-        let viewport = scroll.frame.isEmpty ? app.windows.firstMatch.frame : scroll.frame
-        let targetIsAbove = !targetFrame.isEmpty && targetFrame.maxY <= viewport.minY
-        let moveTowardTop = towardTop || targetIsAbove
-        let startY: CGFloat = moveTowardTop ? 0.32 : 0.68
-        let endY: CGFloat = moveTowardTop ? 0.68 : 0.32
-        let start = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: startY))
-        let end = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: endY))
-
+        // Re-evaluate after every short drag. SwiftUI can report a stale frame
+        // while a sheet or compact ScrollView is settling, so a one-shot
+        // direction can pull the sheet away from the control. Keep gestures in
+        // the middle of the viewport to avoid starting a sheet dismissal.
         for _ in 0..<20 {
             if element.exists && element.isHittable { return }
-            start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0)
+            let targetFrame = element.frame
+            let viewport = scroll.frame.isEmpty ? app.windows.firstMatch.frame : scroll.frame
+            let targetIsAbove = !targetFrame.isEmpty && targetFrame.maxY <= viewport.minY + 4
+            let targetIsBelow = !targetFrame.isEmpty && targetFrame.minY >= viewport.maxY - 4
+            let moveTowardTop = targetIsAbove || (!targetIsBelow && towardTop)
+            let startY: CGFloat = moveTowardTop ? 0.40 : 0.60
+            let endY: CGFloat = moveTowardTop ? 0.60 : 0.40
+            let start = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: startY))
+            let end = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: endY))
+            start.press(forDuration: 0.05, thenDragTo: end)
         }
 
         XCTAssertTrue(element.exists && element.isHittable, "Control is not reachable: \(element)\n\(app.debugDescription)", file: file, line: line)
