@@ -56,7 +56,7 @@ swiftc -swift-version 5 CalorieCompass/Models.swift CalorieCompass/OpenFoodFacts
 .build/live-barcode 3017620422003
 ```
 
-The [GitHub Actions workflow](https://github.com/bond-is-here/nibble/actions/workflows/ios.yml) runs on a standard macOS 26 runner and checks for an iOS 26+ SDK, runs the test suite, and builds both the iPhone Simulator Debug and unsigned iPhone Release configurations. The initial app passed all of these checks in [run 34000992086](https://github.com/bond-is-here/nibble/actions/runs/34000992086). This is build validation, not on-device UI/camera testing or a signed distributable build. The local machine currently lacks full Xcode and the iPhone SDK.
+The [GitHub Actions workflow](https://github.com/bond-is-here/nibble/actions/workflows/ios.yml) runs on a standard macOS 26 runner and checks for an iOS 26+ SDK, runs the test suite, and builds both the iPhone Simulator Debug and unsigned iPhone Release configurations. The initial app passed all of these checks in [run 34000992086](https://github.com/bond-is-here/nibble/actions/runs/34000992086). This is build validation, not on-device UI/camera testing or a signed distributable build. Local shared-code checks and a Mac preview are available through Command Line Tools; full iPhone builds require Xcode’s first-launch license/setup and an iPhone SDK.
 
 ## App Store preparation
 

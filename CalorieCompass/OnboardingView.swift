@@ -90,7 +90,7 @@ struct OnboardingView: View {
             else if planMode == 1 {
                 Text("Already have a daily target? Bring it with you.").font(.system(size: 15)).foregroundStyle(Color.muted)
                 LabeledInput(label: "Daily calorie target", placeholder: "e.g. 2100", text: $target, unit: "cal")
-                Text("Macro targets start at 25% protein, 45% carbs, and 30% fat.")
+                Text("Macro targets start at 25% protein, 45% carbs, and 30% fat. You can customize the mix later in You.")
                     .font(.system(size: 12)).foregroundStyle(Color.muted)
             } else {
                 NibbleMascot(color: .lilac).frame(width: 100, height: 100).rotationEffect(.degrees(-10))
