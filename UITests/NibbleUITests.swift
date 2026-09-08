@@ -120,6 +120,83 @@ final class NibbleUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Choose Mystery soup, 1 serving, 275 calories"].waitForExistence(timeout: 5))
     }
 
+    func testEstimateValidatesAgeAndPreservesMetricProfile() {
+        tap(app.buttons["You"])
+        tap(app.buttons["Tune my plan"])
+        tap(app.buttons["Estimate for me"])
+        tap(app.buttons["kg / cm"])
+        replace(app.textFields["Height"], with: "170")
+        replace(app.textFields["Weight"], with: "70")
+        replace(app.textFields["Age"], with: "17")
+        tap(app.buttons["Save my plan"])
+        let validation = app.staticTexts["Check your details: age 18–100, height 120–230 cm (47–90 in), and weight 35–300 kg (77–661 lb)."]
+        XCTAssertTrue(validation.waitForExistence(timeout: 5), "Underage estimates must be rejected")
+        replace(app.textFields["Age"], with: "30", towardTop: true)
+        tap(app.buttons["Save my plan"])
+        // The midpoint formula at 170 cm / 70 kg / 30 years, light activity,
+        // and maintenance rounds to 2,100 calories. No body data is sent anywhere.
+        expectLabel(app.staticTexts["plan.calories"], "2100")
+        capture("Estimated plan from metric profile")
+        relaunch()
+        tap(app.buttons["You"])
+        expectLabel(app.staticTexts["plan.calories"], "2100")
+        tap(app.buttons["Tune my plan"])
+        XCTAssertEqual(app.textFields["Height"].value as? String, "170")
+        XCTAssertEqual(app.textFields["Weight"].value as? String, "70")
+        XCTAssertEqual(app.textFields["Age"].value as? String, "30")
+        XCTAssertTrue(app.buttons["kg / cm"].isSelected)
+    }
+
+    func testZeroCalorieLoggedDayShowsZeroAverage() {
+        tap(app.buttons["Patterns"])
+        expectLabel(app.staticTexts["patterns.average"], "—")
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Enter calories or create a food"])
+        replace(app.textFields["What did you have?"], with: "Plain water")
+        replace(app.textFields["Calories"], with: "0")
+        tap(app.buttons["Choose a portion"])
+        tap(app.buttons["portion.save"])
+        // A logged zero is real data; only a completely unlogged week shows a dash.
+        expectLabel(app.staticTexts["patterns.average"], "0")
+        capture("Zero-calorie day is not missing data")
+        relaunch()
+        tap(app.buttons["Patterns"])
+        expectLabel(app.staticTexts["patterns.average"], "0")
+    }
+
+    func testInvalidBarcodeFallsBackToLabelWithMilliliterMacros() {
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Scan barcode"])
+        replace(app.textFields["Barcode number"], with: "123")
+        tap(app.buttons["Look up barcode"])
+        // Invalid GTINs fail locally, so this journey never contacts the provider.
+        tap(app.buttons["Enter the label instead"])
+        replace(app.textFields["What did you have?"], with: "Sample juice")
+        replace(app.textFields["Calories"], with: "50")
+        replace(app.textFields["Portion"], with: "per 100 ml")
+        tap(app.switches["Add macros"])
+        replace(app.textFields["Protein"], with: "1")
+        replace(app.textFields["Carbs"], with: "10")
+        replace(app.textFields["Fat"], with: "0")
+        tap(app.buttons["Choose a portion"])
+        tap(app.buttons["200 ml"])
+        expectLabel(app.staticTexts["macro.preview.after.protein"], "2 g")
+        expectLabel(app.staticTexts["macro.preview.after.carbs"], "20 g")
+        expectLabel(app.staticTexts["macro.preview.after.fat"], "0 g")
+        capture("Label fallback with 200 ml portion")
+        tap(app.buttons["portion.save"])
+        expectCalories("100")
+        relaunch()
+        expectCalories("100")
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Recent"])
+        tap(app.buttons["Favorite Sample juice"])
+        tap(app.buttons["Favorites"])
+        XCTAssertTrue(app.buttons["Unfavorite Sample juice"].exists)
+        tap(app.buttons["Quick add Sample juice, per 100 ml"])
+        expectCalories("150")
+    }
+
     private func relaunch() {
         app.terminate()
         // Keep the same test ID: a new process must load the same saved diary.
@@ -149,8 +226,10 @@ final class NibbleUITests: XCTestCase {
     private func replace(_ field: XCUIElement, with value: String, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         reveal(field, towardTop: towardTop, file: file, line: line)
         field.tap()
-        let previous = field.value as? String ?? ""
-        let text = previous == field.placeholderValue ? "" : previous
+        // XCTest may expose placeholder text as value on an empty field. It is
+        // safe to backspace an empty field; it is not safe to assume equal text
+        // means empty (the macro editor's real initial value AND placeholder are 25).
+        let text = field.value as? String ?? ""
         if !text.isEmpty {
             // A center tap can place the caret before right-aligned percentages.
             // Move to the trailing edge before deleting the existing value.

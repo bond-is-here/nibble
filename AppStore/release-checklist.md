@@ -99,3 +99,11 @@ Recheck linked requirements at the actual submission date.
 - [x] Replace the shared networking session with an ephemeral session, no HTTP cache, no cookie handling, and no credential store. Logged and favorited products still persist through the protected diary archive.
 - [x] All 1,116 local checks passed, including nine new request/configuration assertions. These verify client behavior, not provider-side retention.
 - [ ] Verify this change's iOS CI and complete the provider/contact/privacy checks above.
+
+## Expanded customer-journey checks
+
+- [x] Correct the UI text helper's placeholder-equality assumption. A real saved `25` must be cleared even when the placeholder is also `25`; backspacing an empty field is harmless. The follow-up run exposed this remaining helper error before the custom-split journey could complete.
+- [x] Fix Patterns to display `0` for an actual logged zero-calorie day; reserve `—` for a week with no logged days. Add a relaunch regression journey.
+- [x] Add iPhone journeys for rejected underage estimates and saved metric profiles, plus invalid barcode → manual macros → 200 ml portion → saved favorites.
+- [x] Pin the artifact uploader to Node-24-based v7.0.1 after CI reported the v4 runtime deprecation.
+- [ ] Run and inspect all seven UI journeys after these changes. Local checks do not substitute for the runtime assertions or screenshot review.

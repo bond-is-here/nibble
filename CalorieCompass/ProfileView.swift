@@ -25,6 +25,7 @@ struct ProfileView: View {
                     if let targets = appState.targets {
                         HStack(alignment: .firstTextBaseline, spacing: 7) {
                             Text(targets.calories.whole).font(.system(size: 49, weight: .semibold, design: .rounded)).tracking(-2)
+                                .accessibilityIdentifier("plan.calories")
                             Text("cal / day").font(.system(size: 14))
                         }
                         HStack(spacing: 12) {

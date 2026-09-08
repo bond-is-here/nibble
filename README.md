@@ -55,7 +55,7 @@ With full Xcode and an installed iPhone Simulator runtime:
 bash Tools/test-ios.sh
 ```
 
-The `NibbleUITests` target drives onboarding, quick logging, delete/Undo, portion previews and editing, custom calorie-only foods, manual targets, custom macro splits, and persistence across process relaunches. Each test gets a unique UUID-scoped diary and defaults suite through a **Debug-only** launch hook. Normal diaries are never erased or reused. Results, logs, and final-screen attachments are retained under `.build/ui-run.*`; set `NIBBLE_SIMULATOR_ID` to test another installed simulator. The script requires `jq` for automatic simulator selection. Tests use local foods, not the live barcode service.
+The `NibbleUITests` target drives onboarding, quick logging, delete/Undo, portion previews and editing, custom calorie-only foods, manual targets, custom macro splits, adult-estimate validation, metric profile persistence, barcode-error/manual-label fallback, milliliter portions, favorites, zero-calorie averages, and persistence across process relaunches. Each test gets a unique UUID-scoped diary and defaults suite through a **Debug-only** launch hook. Normal diaries are never erased or reused. Results, logs, exported screenshots, and the test-summary JSON are retained under `.build/ui-run.*`; set `NIBBLE_SIMULATOR_ID` to test another installed simulator. The script requires `jq` for automatic simulator selection. Tests use local foods and an invalid GTIN, not the live barcode service.
 
 Optional live network check:
 

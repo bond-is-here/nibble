@@ -58,7 +58,8 @@ struct LogView: View {
                     }
                     HStack {
                         VStack(alignment: .leading, spacing: 5) {
-                            Text(average > 0 ? average.whole : "—").font(.system(size: 23, weight: .semibold, design: .rounded))
+                            Text(loggedDays.isEmpty ? "—" : average.whole).font(.system(size: 23, weight: .semibold, design: .rounded))
+                                .accessibilityIdentifier("patterns.average")
                             Text("average on logged days").font(.system(size: 11)).foregroundStyle(Color.muted)
                         }
                         Spacer()
