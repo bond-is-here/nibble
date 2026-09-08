@@ -3,6 +3,8 @@ import SwiftUI
 struct OnboardingView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let isEditing: Bool
     @State private var setup: Bool
     @State private var planMode = 0
@@ -36,37 +38,37 @@ struct OnboardingView: View {
     private var welcome: some View {
         VStack(alignment: .leading, spacing: 27) {
             HStack {
-                Text("nibble.").font(.system(size: 36, weight: .black, design: .rounded)).tracking(-2)
+                Text("nibble.").nibbleFont(size: 36, weight: .black, design: .rounded).tracking(-2)
                 Spacer()
                 Eyebrow(text: "A little lighter")
             }.padding(.top, 12)
-            ZStack {
+            if !typeSize.isAccessibilitySize { ZStack {
                 RoundedRectangle(cornerRadius: 110).fill(Color.lilac).rotationEffect(.degrees(-8))
                     .frame(width: 240, height: 255)
                 NibbleMascot(color: .lime, cheerful: true).frame(width: 200, height: 200).rotationEffect(.degrees(-13)).offset(x: -3, y: 5)
-                Text("tiny effort.").font(.system(size: 12, weight: .medium, design: .monospaced))
+                Text("tiny effort.").nibbleFont(size: 12, weight: .medium, design: .monospaced)
                     .padding(.horizontal, 15).padding(.vertical, 10).background(.white, in: Capsule())
                     .rotationEffect(.degrees(9)).offset(x: 88, y: -104)
-                Text("big little wins.").font(.system(size: 12, weight: .medium, design: .monospaced))
+                Text("big little wins.").nibbleFont(size: 12, weight: .medium, design: .monospaced)
                     .padding(.horizontal, 15).padding(.vertical, 10).background(.white, in: Capsule())
                     .rotationEffect(.degrees(-6)).offset(x: -64, y: 106)
-                Image(systemName: "sparkle").font(.system(size: 44)).offset(x: -132, y: -69).accessibilityHidden(true)
-            }.frame(maxWidth: .infinity).frame(height: 300).padding(.top, 10)
+                Image(systemName: "sparkle").nibbleFont(size: 44).offset(x: -132, y: -69).accessibilityHidden(true)
+            }.frame(maxWidth: .infinity).frame(height: 300).padding(.top, 10).accessibilityHidden(true) }
             VStack(alignment: .leading, spacing: 13) {
                 Text("Less logging.\nMore living.")
-                    .font(.system(size: 48, weight: .semibold, design: .rounded)).tracking(-2.7)
+                    .nibbleFont(size: 48, weight: .semibold, design: .rounded).tracking(-2.7)
                     .lineSpacing(-3).fixedSize(horizontal: false, vertical: true)
                 Text("A food diary for real life. Find your balance, remember your favorites, and get on with your day.")
-                    .font(.system(size: 16)).foregroundStyle(Color.muted).lineSpacing(4)
+                    .nibbleFont(size: 16).foregroundStyle(Color.muted).lineSpacing(4)
             }
             VStack(spacing: 18) {
-                NibbleButton(title: "Let’s make it yours") { withAnimation { setup = true } }
+                NibbleButton(title: "Let’s make it yours") { withAnimation(reduceMotion ? nil : .default) { setup = true } }
                 Button("Just start logging") { _ = appState.startTracking() }
-                    .font(.system(size: 14, weight: .medium)).buttonStyle(.plain)
+                    .nibbleFont(size: 14, weight: .medium).buttonStyle(.plain).frame(minHeight: 44)
             }
             HStack(spacing: 7) {
-                Image(systemName: "lock").font(.system(size: 10))
-                Text("No account. Your diary stays on this device.").font(.system(size: 10))
+                Image(systemName: "lock").nibbleFont(size: 10)
+                Text("No account. Your diary stays on this device.").nibbleFont(size: 10)
             }.foregroundStyle(Color.muted).frame(maxWidth: .infinity)
         }.foregroundStyle(Color.ink)
     }
@@ -80,22 +82,32 @@ struct OnboardingView: View {
                     if isEditing { dismiss() } else { setup = false }
                 }
             }
-            Text("Find your\nkind of balance.").font(.system(size: 35, weight: .semibold, design: .rounded)).tracking(-1.5)
-            Picker("Plan type", selection: $planMode) {
+            Text("Find your\nkind of balance.").nibbleFont(size: 35, weight: .semibold, design: .rounded).tracking(-1.5)
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(Array(["Estimate for me", "Set my own", "Just track"].enumerated()), id: \.offset) { index, title in
+                        Button { planMode = index } label: {
+                            Label(title, systemImage: planMode == index ? "checkmark.circle.fill" : "circle")
+                                .nibbleFont(size: 15).padding(12).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                                .background(planMode == index ? Color.lime : Color.fog, in: RoundedRectangle(cornerRadius: 16))
+                        }.buttonStyle(.plain).accessibilityAddTraits(planMode == index ? .isSelected : [])
+                    }
+                }.accessibilityElement(children: .contain).accessibilityLabel("Plan type")
+            } else { Picker("Plan type", selection: $planMode) {
                 Text("Estimate for me").tag(0)
                 Text("Set my own").tag(1)
                 Text("Just track").tag(2)
-            }.pickerStyle(.segmented)
+            }.pickerStyle(.segmented) }
             if planMode == 0 { estimateForm }
             else if planMode == 1 {
-                Text("Already have a daily target? Bring it with you.").font(.system(size: 15)).foregroundStyle(Color.muted)
+                Text("Already have a daily target? Bring it with you.").nibbleFont(size: 15).foregroundStyle(Color.muted)
                 LabeledInput(label: "Daily calorie target", placeholder: "e.g. 2100", text: $target, unit: "cal")
                 Text("Macro targets start at 25% protein, 45% carbs, and 30% fat. You can customize the mix later in You.")
-                    .font(.system(size: 12)).foregroundStyle(Color.muted)
+                    .nibbleFont(size: 12).foregroundStyle(Color.muted)
             } else {
                 NibbleMascot(color: .lilac).frame(width: 100, height: 100).rotationEffect(.degrees(-10))
                 Text("Awareness is a great place to start. Log calories and macros without a daily target.")
-                    .font(.system(size: 16)).foregroundStyle(Color.muted).lineSpacing(4)
+                    .nibbleFont(size: 16).foregroundStyle(Color.muted).lineSpacing(4)
             }
             if let error { InlineMessage(text: error) }
             if let error = appState.storageError { InlineMessage(text: error) }
@@ -105,24 +117,19 @@ struct OnboardingView: View {
 
     private var estimateForm: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack {
-                Text("Your starting point").font(.system(size: 15, weight: .semibold))
-                Spacer()
-                Picker("Units", selection: Binding(get: { units }, set: { new in
-                    convertUnits(from: units, to: new)
-                    units = new
-                })) {
-                    ForEach(DisplayUnits.allCases) { Text($0.title).tag($0) }
-                }.pickerStyle(.segmented).frame(width: 150)
+            NibbleAdaptiveStack(spacing: 12) {
+                Text("Your starting point").nibbleFont(size: 15, weight: .semibold)
+                if typeSize.isAccessibilitySize { unitsPicker.pickerStyle(.menu) }
+                else { unitsPicker.pickerStyle(.segmented).frame(width: 150) }
             }
-            HStack(alignment: .top, spacing: 12) {
+            NibbleAdaptiveStack(spacing: 12) {
                 LabeledInput(label: "Height", placeholder: units == .metric ? "170" : "67", text: $height, unit: units == .metric ? "cm" : "in")
                 LabeledInput(label: "Weight", placeholder: units == .metric ? "70" : "154", text: $weight, unit: units == .metric ? "kg" : "lb")
                 LabeledInput(label: "Age", placeholder: "30", text: $age)
             }
             menuRow("Formula", selection: $sex, values: Sex.allCases, title: { $0.title })
             if sex == .unspecified {
-                Text("Midpoint averages the male and female formula estimates.").font(.system(size: 10)).foregroundStyle(Color.muted)
+                Text("Midpoint averages the male and female formula estimates.").nibbleFont(size: 10).foregroundStyle(Color.muted)
             }
             menuRow("Movement", selection: $activity, values: ActivityLevel.allCases, title: { $0.title })
             menuRow("Direction", selection: $goal, values: Goal.allCases, title: { $0.title })
@@ -134,21 +141,29 @@ struct OnboardingView: View {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 6) {
                         Eyebrow(text: "Your starting estimate", color: .ink)
-                        Text("\(targets.calories.whole) cal / day").font(.system(size: 23, weight: .semibold, design: .rounded))
+                        Text("\(targets.calories.whole) cal / day").nibbleFont(size: 23, weight: .semibold, design: .rounded)
                     }
                     Spacer()
                     Image(systemName: "sparkles")
                 }.cardSurface(.lime, padding: 18)
             }
             Text("Estimates are for adults, excluding pregnancy and breastfeeding. They’re a starting point, not a prescription.")
-                .font(.system(size: 11)).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)
+                .nibbleFont(size: 11).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var unitsPicker: some View {
+        Picker("Units", selection: Binding(get: { units }, set: { new in
+            convertUnits(from: units, to: new)
+            units = new
+        })) {
+            ForEach(DisplayUnits.allCases) { Text($0.title).tag($0) }
         }
     }
 
     private func menuRow<T: Hashable & Identifiable>(_ label: String, selection: Binding<T>, values: [T], title: @escaping (T) -> String) -> some View {
-        HStack {
-            Text(label).font(.system(size: 13)).foregroundStyle(Color.muted)
-            Spacer()
+        NibbleAdaptiveStack(spacing: 8) {
+            Text(label).nibbleFont(size: 13).foregroundStyle(Color.muted)
             Picker(label, selection: selection) {
                 ForEach(values) { Text(title($0)).tag($0) }
             }.labelsHidden().pickerStyle(.menu)

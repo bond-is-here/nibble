@@ -198,6 +198,31 @@ final class NibbleUITests: XCTestCase {
         expectCalories("150")
     }
 
+    func testLargestTextCanOnboardLogAndExploreMacros() throws {
+        let ordinaryAddHeight = app.buttons["Add food"].frame.height
+        app.terminate()
+        app.launchEnvironment["NIBBLE_UI_TEST_ID"] = UUID().uuidString
+        app.launchEnvironment["NIBBLE_UI_TEST_TEXT_SIZE"] = "accessibility5"
+        app.launch()
+        capture("Largest text onboarding")
+        tap(app.buttons["Just start logging"])
+        expectCalories("0")
+        XCTAssertGreaterThan(app.buttons["Add food"].frame.height, ordinaryAddHeight, "The launch must actually exercise scaled text")
+        capture("Largest text diary")
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Choose Greek yogurt, 1 cup, 150 calories"])
+        XCTAssertTrue(app.buttons["portion.save"].isHittable, "Save stays reachable at the largest text size")
+        capture("Largest text portion and visible save")
+        tap(app.buttons["portion.save"])
+        expectCalories("150")
+        tap(app.buttons["Explore your macro mix"])
+        capture("Largest text Macro Mix")
+        try app.performAccessibilityAudit(for: [.textClipped, .sufficientElementDescription, .contrast])
+        tap(app.buttons["Close macro mix"], towardTop: true)
+        relaunch()
+        expectCalories("150")
+    }
+
     private func relaunch() {
         app.terminate()
         // Keep the same test ID: a new process must load the same saved diary.

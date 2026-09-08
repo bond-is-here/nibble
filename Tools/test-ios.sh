@@ -4,10 +4,25 @@ cd "$(dirname "$0")/.."
 mkdir -p .build
 
 # Pick an installed iPhone runtime, never a physical device or a hard-coded UUID.
-nibble_simulator_id=${NIBBLE_SIMULATOR_ID:-$(xcrun simctl list devices available --json | jq -r '
+# Compact QA creates its own SE-sized simulator; it never erases an existing one.
+nibble_simulator_id=${NIBBLE_SIMULATOR_ID:-}
+if [[ -z "$nibble_simulator_id" && "${NIBBLE_SIMULATOR_KIND:-standard}" == "compact" ]]; then
+  nibble_runtime_id=$(xcrun simctl list runtimes --json | jq -r '
+    [.runtimes[] | select(.isAvailable and (.identifier | contains(".iOS-")))]
+    | sort_by(.version | split(".") | map(tonumber)) | last | .identifier // empty')
+  nibble_device_type=$(xcrun simctl list devicetypes --json | jq -r '
+    .devicetypes[] | select(.name == "iPhone SE (3rd generation)") | .identifier')
+  if [[ -z "$nibble_runtime_id" || -z "$nibble_device_type" ]]; then
+    echo "Compact QA requires an available iOS runtime and iPhone SE (3rd generation) device type." >&2
+    exit 1
+  fi
+  nibble_simulator_id=$(xcrun simctl create "Nibble compact QA $(uuidgen)" "$nibble_device_type" "$nibble_runtime_id")
+elif [[ -z "$nibble_simulator_id" ]]; then
+  nibble_simulator_id=$(xcrun simctl list devices available --json | jq -r '
   [.devices | to_entries[] | select(.key | contains("iOS")) | .value[]
    | select(.isAvailable and (.name | startswith("iPhone")))]
-  | sort_by(.name) | last | .udid // empty')}
+  | sort_by(.name) | last | .udid // empty')
+fi
 if [[ -z "$nibble_simulator_id" ]]; then
   echo "No available iPhone Simulator runtime. Install one through Xcode Settings → Components." >&2
   exit 1

@@ -3,6 +3,7 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     let onAddFood: (Meal) -> Void
     let onScan: () -> Void
     @State private var showCalendar = false
@@ -27,7 +28,7 @@ struct DashboardView: View {
                 diary
                 HStack {
                     Spacer()
-                    Text("A little awareness. A lot of living.").font(.system(size: 11)).foregroundStyle(Color.muted)
+                    Text("A little awareness. A lot of living.").nibbleFont(size: 11).foregroundStyle(Color.muted)
                     Spacer()
                 }.padding(.vertical, 8)
             }.padding(.horizontal, 23).padding(.top, 16).padding(.bottom, 20)
@@ -35,7 +36,7 @@ struct DashboardView: View {
         .sheet(isPresented: $showCalendar) {
             VStack(spacing: 22) {
                 HStack {
-                    Text("Pick a day").font(.system(size: 26, weight: .bold, design: .rounded))
+                    Text("Pick a day").nibbleFont(size: 26, weight: .bold, design: .rounded)
                     Spacer()
                     RoundButton(icon: "xmark", label: "Close calendar") { showCalendar = false }
                 }
@@ -56,12 +57,12 @@ struct DashboardView: View {
     private var header: some View {
         HStack(alignment: .center) {
             HStack(spacing: 3) {
-                Text("nibble").font(.system(size: 34, weight: .black, design: .rounded)).tracking(-2.2)
+                Text("nibble").nibbleFont(size: 34, weight: .black, design: .rounded).tracking(-2.2)
                 Circle().fill(Color.limeDark).frame(width: 7, height: 7).offset(y: 9)
             }.foregroundStyle(Color.ink).accessibilityLabel("Nibble")
             Spacer()
             if appState.isPreview {
-                Text("DEMO").font(.system(size: 8, weight: .bold, design: .monospaced)).tracking(1)
+                Text("DEMO").nibbleFont(size: 8, weight: .bold, design: .monospaced).tracking(1)
                     .padding(.horizontal, 8).padding(.vertical, 5).background(Color.fog, in: Capsule())
             }
             RoundButton(icon: "barcode.viewfinder", label: "Scan a food barcode", fill: .white, action: onScan)
@@ -73,24 +74,24 @@ struct DashboardView: View {
             HStack {
                 Button { showCalendar = true } label: {
                     HStack(spacing: 7) {
-                        Text(appState.selectedDate.diaryTitle).font(.system(size: 14, weight: .semibold))
-                        Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold))
+                        Text(appState.selectedDate.diaryTitle).nibbleFont(size: 14, weight: .semibold)
+                        Image(systemName: "chevron.down").nibbleFont(size: 9, weight: .bold)
                     }.foregroundStyle(Color.ink)
                 }.buttonStyle(.plain)
                 Spacer()
                 Text(appState.selectedDate.formatted(.dateTime.month(.wide).year()).uppercased())
-                    .font(.system(size: 9, weight: .medium, design: .monospaced)).tracking(1.3).foregroundStyle(Color.muted)
+                    .nibbleFont(size: 9, weight: .medium, design: .monospaced).tracking(1.3).foregroundStyle(Color.muted)
             }
-            HStack(spacing: 8) {
+            ScrollView(.horizontal, showsIndicators: false) { HStack(spacing: 4) {
                 ForEach(week, id: \.self) { date in
                     let selected = Calendar.current.isDate(date, inSameDayAs: appState.selectedDate)
-                    Button { withAnimation(.easeInOut(duration: 0.2)) { appState.selectedDate = date } } label: {
+                    Button { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { appState.selectedDate = date } } label: {
                         VStack(spacing: 7) {
-                            Text(String(date.shortDay.prefix(1))).font(.system(size: 10, weight: .medium))
+                            Text(String(date.shortDay.prefix(1))).nibbleFont(size: 10, weight: .medium)
                                 .foregroundStyle(selected ? Color.ink : Color.muted)
-                            Text(date.formatted(.dateTime.day())).font(.system(size: 13, weight: .semibold))
+                            Text(date.formatted(.dateTime.day())).nibbleFont(size: 13, weight: .semibold)
                             Circle().fill(!appState.entries(on: date).isEmpty ? Color.ink : Color.clear).frame(width: 3, height: 3)
-                        }.frame(maxWidth: .infinity).padding(.vertical, 9)
+                        }.frame(minWidth: 44).padding(.vertical, 9)
                             .foregroundStyle(Color.ink)
                             .background(selected ? Color.lime : Color.clear, in: Capsule())
                             .contentShape(Capsule())
@@ -98,7 +99,7 @@ struct DashboardView: View {
                         .accessibilityLabel(date.formatted(date: .complete, time: .omitted))
                         .accessibilityAddTraits(selected ? .isSelected : [])
                 }
-            }
+            }}.defaultScrollAnchor(.trailing)
         }
     }
 
@@ -107,41 +108,40 @@ struct DashboardView: View {
             HStack {
                 Eyebrow(text: "Your daily bite", color: .ink)
                 Spacer()
-                Image(systemName: "sparkle").font(.system(size: 20)).foregroundStyle(Color.ink).accessibilityHidden(true)
+                Image(systemName: "sparkle").nibbleFont(size: 20).foregroundStyle(Color.ink).accessibilityHidden(true)
             }
             HStack(alignment: .center, spacing: 0) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(totals.calories.whole)
                         .accessibilityIdentifier("diary.calories")
-                        .font(.system(size: 62, weight: .medium, design: .rounded)).tracking(-4)
+                        .nibbleFont(size: 62, weight: .medium, design: .rounded).tracking(-4)
                         .lineLimit(1).minimumScaleFactor(0.7).contentTransition(.numericText())
-                    Text("calories enjoyed").font(.system(size: 13, weight: .medium)).foregroundStyle(Color.ink.opacity(0.7))
+                    Text("calories enjoyed").nibbleFont(size: 13, weight: .medium).foregroundStyle(Color.ink.opacity(0.7))
                 }
                 Spacer(minLength: 8)
-                NibbleMascot(color: .white.opacity(0.8), cheerful: !appState.selectedEntries.isEmpty)
+                if !typeSize.isAccessibilitySize { NibbleMascot(color: .white.opacity(0.8), cheerful: !appState.selectedEntries.isEmpty)
                     .frame(width: 112, height: 112)
                     .rotationEffect(.degrees(mascotTilt ? 8 : -7))
                     .onTapGesture {
                         guard !reduceMotion else { return }
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.35)) { mascotTilt.toggle() }
                         NibbleHaptics.tap()
-                    }
+                    } }
             }
             if let target {
                 GeometryReader { g in
                     Capsule().fill(Color.ink.opacity(0.1))
                     Capsule().fill(Color.ink).frame(width: g.size.width * min(totals.calories / max(target, 1), 1))
                 }.frame(height: 7).accessibilityHidden(true)
-                HStack(alignment: .firstTextBaseline) {
+                NibbleAdaptiveStack(spacing: 8) {
                     HStack(spacing: 4) {
-                        Text(abs(target - totals.calories).whole).font(.system(size: 16, weight: .bold, design: .rounded))
-                        Text(totals.calories <= target ? "left today" : "above target").font(.system(size: 12))
+                        Text(abs(target - totals.calories).whole).nibbleFont(size: 16, weight: .bold, design: .rounded)
+                        Text(totals.calories <= target ? "left today" : "above target").nibbleFont(size: 12)
                     }
-                    Spacer()
-                    Text("\(target.whole) goal").font(.system(size: 12)).foregroundStyle(Color.ink.opacity(0.65))
+                    Text("\(target.whole) goal").nibbleFont(size: 12).foregroundStyle(Color.ink.opacity(0.65))
                 }
             } else {
-                Text("Just noticing. No target needed.").font(.system(size: 13, weight: .medium))
+                Text("Just noticing. No target needed.").nibbleFont(size: 13, weight: .medium)
                     .padding(.top, 5)
             }
         }
@@ -158,23 +158,23 @@ struct DashboardView: View {
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
                                 Button { selectedFood = food } label: {
-                                    Text(food.emoji).font(.system(size: 27))
+                                    Text(food.emoji).font(.system(size: 27)).frame(minWidth: 44, minHeight: 44)
                                 }.buttonStyle(.plain).accessibilityLabel("Adjust \(food.name) portion")
                                 Spacer()
                                 Button {
                                     if appState.addEntry(food: food, meal: .suggested(), servings: 1) { NibbleHaptics.tap() }
                                 } label: {
-                                    Image(systemName: "plus").font(.system(size: 12, weight: .semibold))
-                                        .frame(width: 36, height: 36).background(Color.canvas, in: Circle())
+                                    Image(systemName: "plus").nibbleFont(size: 12, weight: .semibold)
+                                        .frame(width: 44, height: 44).background(Color.canvas, in: Circle())
                                 }.buttonStyle(.plain).accessibilityLabel("Log \(food.name), \(food.servingText)")
                             }
                             Button { selectedFood = food } label: {
                                 VStack(alignment: .leading, spacing: 3) {
-                                    Text(food.name).font(.system(size: 12, weight: .semibold)).lineLimit(1)
-                                    Text("\(food.calories.whole) cal · \(food.servingText)").font(.system(size: 9)).foregroundStyle(Color.muted).lineLimit(1)
+                                    Text(food.name).nibbleFont(size: 12, weight: .semibold)
+                                    Text("\(food.calories.whole) cal · \(food.servingText)").nibbleFont(size: 9).foregroundStyle(Color.muted)
                                 }.frame(maxWidth: .infinity, alignment: .leading)
                             }.buttonStyle(.plain)
-                        }.foregroundStyle(Color.ink).padding(13).frame(width: 150)
+                        }.foregroundStyle(Color.ink).padding(13).frame(width: typeSize.isAccessibilitySize ? 260 : 150)
                             .background(Color.white, in: RoundedRectangle(cornerRadius: 20))
                     }
                 }
@@ -189,27 +189,26 @@ struct DashboardView: View {
                 let entries = appState.selectedEntries.filter { $0.meal == meal }
                 VStack(spacing: 0) {
                     HStack {
-                        Image(systemName: meal.icon).font(.system(size: 14, weight: .medium)).frame(width: 20)
-                        Text(meal.title).font(.system(size: 14, weight: .semibold))
+                        Image(systemName: meal.icon).nibbleFont(size: 14, weight: .medium).frame(width: 20)
+                        Text(meal.title).nibbleFont(size: 14, weight: .semibold)
                         Spacer()
                         if !entries.isEmpty {
-                            Text(entries.reduce(0) { $0 + $1.calories }.whole + " cal").font(.system(size: 11)).foregroundStyle(Color.muted)
+                            Text(entries.reduce(0) { $0 + $1.calories }.whole + " cal").nibbleFont(size: 11).foregroundStyle(Color.muted)
                         }
                         Button { onAddFood(meal) } label: {
-                            Image(systemName: "plus").font(.system(size: 14, weight: .medium)).frame(width: 38, height: 40)
+                            Image(systemName: "plus").font(.system(size: 14, weight: .medium)).frame(width: 44, height: 44)
                         }.buttonStyle(.plain).accessibilityLabel("Add food to \(meal.title)")
                     }
                     ForEach(entries) { entry in
                         HStack(spacing: 11) {
                             Button { editingEntry = entry } label: {
-                                HStack(spacing: 11) {
-                                    FoodBadge(food: entry.food, size: 39)
+                                NibbleAdaptiveStack(spacing: 11) {
+                                    if !typeSize.isAccessibilitySize { FoodBadge(food: entry.food, size: 39) }
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text(entry.food.name).font(.system(size: 13, weight: .medium)).lineLimit(1)
-                                        Text(entry.portionDescription).font(.system(size: 10)).foregroundStyle(Color.muted)
+                                        Text(entry.food.name).nibbleFont(size: 13, weight: .medium)
+                                        Text(entry.portionDescription).nibbleFont(size: 10).foregroundStyle(Color.muted)
                                     }
-                                    Spacer(minLength: 4)
-                                    Text(entry.calories.whole).font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    Text(entry.calories.whole).nibbleFont(size: 13, weight: .semibold, design: .rounded)
                                 }.contentShape(Rectangle())
                             }.buttonStyle(.plain).accessibilityLabel("Edit \(entry.food.name), \(entry.calories.whole) calories")
                             Menu {
@@ -219,14 +218,14 @@ struct DashboardView: View {
                                 }
                                 Button("Delete", systemImage: "trash", role: .destructive) { appState.deleteEntry(entry) }
                             } label: {
-                                Image(systemName: "ellipsis").frame(width: 30, height: 40)
+                                Image(systemName: "ellipsis").frame(width: 44, height: 44)
                             }.menuStyle(.borderlessButton).fixedSize().accessibilityLabel("Options for \(entry.food.name)")
                         }.padding(.vertical, 10)
                     }
                     if entries.isEmpty {
                         Button { onAddFood(meal) } label: {
-                            Text("Add a little something").font(.system(size: 12)).foregroundStyle(Color.muted)
-                                .frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 10).padding(.top, 3)
+                            Text("Add a little something").nibbleFont(size: 12).foregroundStyle(Color.muted)
+                                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading).padding(.bottom, 10).padding(.top, 3)
                         }.buttonStyle(.plain)
                     }
                 }.foregroundStyle(Color.ink).padding(.horizontal, 16).padding(.vertical, 5)

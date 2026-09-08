@@ -116,3 +116,15 @@ Recheck linked requirements at the actual submission date.
 - [x] In [run 34179784015](https://github.com/bond-is-here/nibble/actions/runs/34179784015), shared checks and both iOS builds passed. The expanded UI run failed on the estimate's formatted `2,100` label and the macro field's retained `25` during replacement. Neither incomplete journey is certified.
 - [x] Correct the locale-specific display expectation and use the iOS Select All editing action for percentage replacement instead of assuming the caret position.
 - [ ] Verify the new commit's complete simulator result and inspect its sticky-button screenshots. Physical-device, accessibility, privacy, signing, and account gates remain open.
+- [x] Follow-up commit `febc521` passed shared checks, both iOS builds, and the UI-test step in [run 34181081328](https://github.com/bond-is-here/nibble/actions/runs/34181081328). This result predates the Dynamic Type changes below.
+
+## Dynamic Type and compact-screen pass
+
+- [x] Use scaled fonts for diary, food entry, onboarding, profile, Patterns, and Macro Mix text. Stack dense rows at accessibility sizes; keep decorative ring labels fixed because accessible, scalable values are repeated outside the rings.
+- [x] Make the entire food picker scrollable, grow form/button heights, enlarge small action targets, and keep the bottom navigation usable at larger sizes. Respect Reduce Motion for date, onboarding, and toast transitions.
+- [x] Darken secondary text; all 12 shared ink/muted contrast pairs meet 4.5:1 on the actual six surface colors. All 1,128 local checks and the shared warnings-as-errors typecheck pass.
+- [x] Inspect macOS previews of regular and accessibility-layout diary, portion, and Macro Mix screens. They verify shared layout branching, not iOS font scaling or VoiceOver.
+- [x] Add a largest-text iPhone journey with real isolated persistence, a scaling assertion, visible portion Save, and XCTest clipping/description/contrast audits. Add independent regular and SE-sized CI jobs without cancelling one on the other's failure.
+- [ ] Run and inspect both eight-journey jobs and their actual iOS screenshots after this pass. An audit of one visible screen does not certify whole-app accessibility; complete VoiceOver, intermediate text sizes, older supported iOS versions, and physical-device gates above.
+
+Implementation follows Apple's [Dynamic Type guidance](https://developer.apple.com/videos/play/wwdc2024/10074/) and [XCTest accessibility audit guidance](https://developer.apple.com/documentation/accessibility/performing-accessibility-audits-for-your-app). Do not treat implemented support or configured audits as a passed release gate.

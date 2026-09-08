@@ -31,7 +31,22 @@ struct NibbleApp: App {
         .defaultSize(width: 430, height: 900)
         .windowResizability(.contentSize)
         #else
-        WindowGroup { ContentView().environmentObject(appState) }
+        WindowGroup { ContentView().environmentObject(appState).modifier(NibbleUITestAppearance()) }
+        #endif
+    }
+}
+
+/// Exercise the same Dynamic Type layout path without changing device-wide settings.
+/// Only UUID-isolated Debug test launches can override the real environment.
+private struct NibbleUITestAppearance: ViewModifier {
+    @ViewBuilder func body(content: Content) -> some View {
+        #if DEBUG
+        if let id = ProcessInfo.processInfo.environment["NIBBLE_UI_TEST_ID"], UUID(uuidString: id) != nil,
+           ProcessInfo.processInfo.environment["NIBBLE_UI_TEST_TEXT_SIZE"] == "accessibility5" {
+            content.dynamicTypeSize(.accessibility5).environment(\.accessibilityReduceMotion, true)
+        } else { content }
+        #else
+        content
         #endif
     }
 }

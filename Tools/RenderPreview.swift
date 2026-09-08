@@ -16,6 +16,9 @@ struct RenderPreview {
         try render(PhoneFrame { LogView().environmentObject(demo) }, name: "nibble-patterns", output: output)
         try render(PhoneFrame { MacroMixView().environmentObject(demo) }, name: "nibble-macro-mix", output: output)
         try render(PhoneFrame { MacroSplitEditor().environmentObject(demo) }, name: "nibble-mixing-desk", output: output)
+        try render(PhoneFrame { MainTabView().environmentObject(demo).dynamicTypeSize(.accessibility5) }, name: "nibble-large-text-diary", output: output)
+        try render(PhoneFrame { FoodPortionView(food: AppState.foodDatabase[3], initialMeal: .lunch).environmentObject(demo).dynamicTypeSize(.accessibility5) }, name: "nibble-large-text-portion", output: output)
+        try render(PhoneFrame { MacroMixView().environmentObject(demo).dynamicTypeSize(.accessibility5) }, name: "nibble-large-text-macros", output: output)
         try render(PhoneFrame {
             ScrollView { MacroWeekView(week: MacroWeek(entries: demo.entries, ending: Date())).padding(23) }
         }, name: "nibble-macro-week", output: output)

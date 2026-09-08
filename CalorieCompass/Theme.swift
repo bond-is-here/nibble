@@ -5,7 +5,7 @@ import UIKit
 
 extension Color {
     static let ink = Color(hex: "242820")
-    static let muted = Color(hex: "72766B")
+    static let muted = Color(hex: "5E6257")
     static let canvas = Color(hex: "F7F7F2")
     static let lime = Color(hex: "D9F878")
     static let limeDark = Color(hex: "54692E")
@@ -21,6 +21,10 @@ extension Color {
 }
 
 extension View {
+    /// Preserve Nibble's typography while following the person's Dynamic Type setting.
+    func nibbleFont(size: CGFloat, weight: Font.Weight = .regular, design: Font.Design = .default) -> some View {
+        modifier(NibbleFont(size: size, weight: weight, design: design))
+    }
     func cardSurface(_ color: Color = .paper, padding: CGFloat = 20) -> some View {
         self.padding(padding).background(color, in: RoundedRectangle(cornerRadius: 26))
     }
@@ -47,6 +51,37 @@ extension View {
     }
 }
 
+private struct NibbleFont: ViewModifier {
+    @ScaledMetric private var size: CGFloat
+    let weight: Font.Weight
+    let design: Font.Design
+
+    init(size: CGFloat, weight: Font.Weight, design: Font.Design) {
+        let style: Font.TextStyle = size >= 30 ? .largeTitle : size >= 20 ? .title3 : size >= 16 ? .body : .caption
+        _size = ScaledMetric(wrappedValue: size, relativeTo: style)
+        self.weight = weight
+        self.design = design
+    }
+
+    func body(content: Content) -> some View {
+        content.font(.system(size: size, weight: weight, design: design))
+    }
+}
+
+/// Wide rows become a reading-order column at accessibility text sizes.
+struct NibbleAdaptiveStack<Content: View>: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+    var spacing: CGFloat = 12
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: spacing))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: spacing))
+        layout(content)
+    }
+}
+
 enum NibbleHaptics {
     static func tap() {
         #if os(iOS)
@@ -70,8 +105,9 @@ struct NibbleButton: View {
                 Spacer(minLength: 8)
                 Image(systemName: icon)
             }
-            .font(.system(size: 16, weight: .semibold))
-            .padding(.horizontal, 23).frame(minHeight: 56)
+            .nibbleFont(size: 16, weight: .semibold)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 23).padding(.vertical, 16).frame(minHeight: 56)
             .foregroundStyle(dark ? Color.white : Color.ink)
             .background(dark ? Color.ink : Color.lime, in: Capsule())
             .contentShape(Capsule())
@@ -98,7 +134,7 @@ struct Eyebrow: View {
     let text: String
     var color: Color = .muted
     var body: some View {
-        Text(text.uppercased()).font(.system(size: 10, weight: .bold, design: .monospaced))
+        Text(text.uppercased()).nibbleFont(size: 10, weight: .bold, design: .monospaced)
             .tracking(1.8).foregroundStyle(color)
     }
 }
@@ -107,10 +143,10 @@ struct SectionHeading: View {
     let title: String
     var detail: String? = nil
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(title).font(.system(size: 21, weight: .semibold, design: .rounded)).tracking(-0.6)
-            Spacer()
-            if let detail { Text(detail).font(.system(size: 11)).foregroundStyle(Color.muted) }
+        NibbleAdaptiveStack(spacing: 8) {
+            Text(title).nibbleFont(size: 21, weight: .semibold, design: .rounded).tracking(-0.6)
+                .frame(maxWidth: .infinity, alignment: .leading).accessibilityAddTraits(.isHeader)
+            if let detail { Text(detail).nibbleFont(size: 11).foregroundStyle(Color.muted) }
         }.foregroundStyle(Color.ink)
     }
 }
@@ -190,15 +226,16 @@ struct LabeledInput: View {
     var numeric = true
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(label).font(.system(size: 12, weight: .medium)).foregroundStyle(Color.muted)
+            Text(label).nibbleFont(size: 12, weight: .medium).foregroundStyle(Color.muted)
             HStack {
                 Group {
                     if numeric { TextField(placeholder, text: $text).numericKeyboard() }
                     else { TextField(placeholder, text: $text).sentenceInput() }
                 }
-                .textFieldStyle(.plain).font(.system(size: 20, weight: .semibold, design: .rounded))
+                .textFieldStyle(.plain).nibbleFont(size: 20, weight: .semibold, design: .rounded)
                 .accessibilityLabel(label)
-                if !unit.isEmpty { Text(unit).font(.system(size: 12)).foregroundStyle(Color.muted) }
+                .accessibilityHint(unit.isEmpty ? "" : "Measured in \(unit)")
+                if !unit.isEmpty { Text(unit).nibbleFont(size: 12).foregroundStyle(Color.muted) }
             }
             .padding(15).background(Color.white, in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.line))
@@ -218,19 +255,20 @@ struct FoodBadge: View {
 }
 
 struct MealSelector: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Binding var selected: Meal
     var body: some View {
-        HStack(spacing: 5) {
+        NibbleAdaptiveStack(spacing: 5) {
             ForEach(Meal.allCases) { meal in
                 Button { selected = meal } label: {
-                    Text(meal.title).font(.system(size: 12, weight: .semibold))
+                    Text(meal.title).nibbleFont(size: 12, weight: .semibold)
                         .frame(maxWidth: .infinity).padding(.vertical, 13)
                         .background(selected == meal ? Color.ink : Color.clear, in: Capsule())
                         .foregroundStyle(selected == meal ? Color.white : Color.muted)
                         .contentShape(Capsule())
                 }.buttonStyle(.plain).accessibilityAddTraits(selected == meal ? .isSelected : [])
             }
-        }.padding(4).background(Color.fog, in: Capsule())
+        }.padding(4).background(Color.fog, in: RoundedRectangle(cornerRadius: typeSize.isAccessibilitySize ? 24 : 50))
     }
 }
 
@@ -238,7 +276,8 @@ struct InlineMessage: View {
     let text: String
     var body: some View {
         Label(text, systemImage: "info.circle")
-            .font(.system(size: 12)).foregroundStyle(Color.ink)
+            .nibbleFont(size: 12).foregroundStyle(Color.ink)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(14).frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.peach, in: RoundedRectangle(cornerRadius: 16))
     }
