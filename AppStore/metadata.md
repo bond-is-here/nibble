@@ -14,7 +14,7 @@ Prepared September 5, 2026 from the current README and Swift source. This is pre
 | Primary language | English (U.S.) | Draft locale; confirm the actual app record. |
 | Platform / device family | iOS / iPhone | Project targets iPhone (`TARGETED_DEVICE_FAMILY = 1`) and portrait orientation. |
 | Minimum OS | iOS 17.0 | Runtime deployment target in the project; separate from Apple's required upload SDK. |
-| Version / build | 1.0 / 2 | Current project values; reconcile with existing App Store Connect records before upload. |
+| Version / build | 1.0 / 3 | Current project values; reconcile with existing App Store Connect records before upload. |
 | Bundle ID | com.caloriecompass.app | Retained for Calorie Compass continuity. Owner must establish registration and signing access. |
 | Copyright | Owner to supply the year and actual rights-holder name | Required field; do not infer a legal identity from the GitHub username. |
 | Age rating | Not yet determined | Complete the current questionnaire; see evidence below. |
@@ -71,7 +71,7 @@ GitHub Issues is the planned public contact channel; never invent an email addre
 
 The code supports these observations:
 
-- `AppState.swift` stores diary, foods, preferences, and an optional profile locally; migration retains earlier UserDefaults records. `Models.swift` defines the saved fields. There is no HealthKit integration or developer cloud sync.
+- `AppState.swift` stores diary, foods, preferences, and an optional profile locally in a backup-excluded folder with complete file protection on iOS. Migration preserves earlier records in a verified local recovery file before removing the three old UserDefaults values. `Models.swift` defines the saved fields. There is no HealthKit integration or developer cloud sync.
 - `OpenFoodFactsClient.swift` sends a barcode in an HTTPS product request, plus a Nibble/version User-Agent. No stored diary or profile is included. The receiving provider also sees source IP and other request information.
 - `BarcodeScannerView.swift` recognizes barcode metadata locally; it does not upload images. No analytics, ad, or third-party crash SDK appears in the source.
 - `PrivacyInfo.xcprivacy` currently declares no tracking, an empty collected-data list, and UserDefaults reason `CA92.1`. That file is evidence of the present declaration, not validation of third-party retention or the final App Store privacy label.
@@ -105,7 +105,7 @@ Nibble is a free iPhone food diary. It has no account/login, subscriptions, in-a
 
 5. Add food > Scan barcode supports typing a product barcode and camera scanning. The field's example is 3017620422003; this is a live third-party product lookup, not a fixed fixture, and availability or nutrition completeness can change. Camera scanning needs a physical iPhone and permission. Denied camera access offers Settings and typed entry. An unsuccessful lookup displays an error and offers Enter the label instead. Previously saved foods remain usable offline; new lookups require internet access.
 
-6. You > About targets & food data explains estimates and links the calculation/data sources. Automated profiles accept ages 18-100 and describe exclusions for pregnancy/breastfeeding. The 1,500-calorie estimate floor is a product guardrail, not a clinical minimum. The macro starting split is 25% protein, 45% carbs, and 30% fat. The app does not promise weight outcomes or offer diagnosis.
+6. You > About targets & food data explains estimates and links the calculation/data sources. Automated profiles accept ages 18-100 and describe exclusions for pregnancy/breastfeeding. The 1,500-calorie estimate floor is a product guardrail, not a clinical minimum. The macro split starts at 25% protein, 45% carbs, and 30% fat and can be customized in Tune macro mix. The app does not promise weight outcomes or offer diagnosis.
 
 The diary and optional body profile are saved locally. Barcode requests go to Open Food Facts with the barcode and standard network/request information; the saved diary and body profile are not sent. The app has no HealthKit integration. Delete removes an individual diary entry; saved foods and earlier migration records remain. All data in the current app container can be removed with iOS Settings > General > iPhone Storage > Nibble > Delete App. Device backups are managed separately.
 ```
@@ -113,6 +113,12 @@ The diary and optional body profile are saved locally. Barcode requests go to Op
 The source now includes privacy/support links under You; add that location to the review notes after the pages are public and the links have passed device verification. Do not present the macOS `--demo` preview as the submitted iPhone app or claim these flows have passed device testing. If used during development, `--demo` keeps sample data in memory; submission must be verified with a normal launch and persistent storage.
 
 ## Screenshot plan
+
+### Macro Mix additions for build 3
+
+Diary's Macro Mix opens interactive protein/carbs/fat rings, meal breakdowns, and food contributors. The mixing desk saves custom target energy percentages, preserving the calorie target and logged foods. Portion screens preview the day before/after a proposed addition or edit. Patterns includes seven-day macro proportions and known-gram averages with explicit missing-data handling. Food suggestions are on-device library rankings, not a cloud AI or clinical advice; they pause when the data or context does not support them. Include these flows in device QA and listing copy after verification.
+
+## Screenshot captures
 
 Capture the actual release-candidate iOS UI on an iPhone or iOS Simulator with fictional data. Suggested sequence: populated Diary; Find a food with favorites; a barcode product portion; Make a food; Patterns; You with the target explanation. Verify camera behavior separately on hardware.
 

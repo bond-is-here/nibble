@@ -71,6 +71,7 @@ struct LogView: View {
                     Text("Unlogged days are left out. A partially logged day may make the average lower.")
                         .font(.system(size: 10)).foregroundStyle(Color.muted)
                 }.cardSurface()
+                MacroWeekView(week: MacroWeek(entries: appState.entries, ending: Date()))
                 dayDetail
             }.foregroundStyle(Color.ink).padding(23).padding(.top, 8)
         }

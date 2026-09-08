@@ -47,7 +47,7 @@ struct DiaryChecks {
                 try semanticCorruptionChecks(corruption)
             }
         }
-        run("old UserDefaults migration and retained keys", migrationChecks)
+        run("old UserDefaults migration and protected recovery records", migrationChecks)
         run("saved-food-only legacy data is persisted", savedFoodsOnlyMigrationChecks)
         run("failed migration write does not expose an unsaved diary", failedMigrationWriteChecks)
         run("corrupt legacy import does not expose partial data", corruptMigrationChecks)
@@ -669,8 +669,10 @@ struct DiaryChecks {
     }
 
     private static func expectLegacyRetained(_ payloads: [String: Data], _ fixture: Fixture) throws {
+        let recovery = try fixture.legacyRecovery()
         for (key, bytes) in payloads {
-            try expect(fixture.defaults.data(forKey: key) == bytes, "Migration must retain the original \(key) bytes")
+            try expect(fixture.defaults.data(forKey: key) == bytes || recovery.contains { ($0[key] as? Data) == bytes },
+                       "Migration must preserve the original \(key) bytes in defaults or protected recovery")
         }
     }
 
@@ -803,6 +805,11 @@ private final class Fixture {
     func readDiary() throws -> Data { try Data(contentsOf: storageURL) }
     func readBlockedDiary() throws -> Data { try Data(contentsOf: backupDirectory.appendingPathComponent("diary.json")) }
     func readBlocker() throws -> Data { try Data(contentsOf: storeDirectory) }
+    func legacyRecovery() throws -> [[String: Any]] {
+        let url = storeDirectory.appendingPathComponent("legacy-recovery.plist")
+        guard manager.fileExists(atPath: url.path) else { return [] }
+        return try PropertyListSerialization.propertyList(from: Data(contentsOf: url), format: nil) as? [[String: Any]] ?? []
+    }
 
     func writeDiary(_ bytes: Data) throws {
         try manager.createDirectory(at: storeDirectory, withIntermediateDirectories: true)

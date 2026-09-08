@@ -12,7 +12,7 @@ concurrency:
 jobs:
   verify:
     runs-on: macos-26
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -29,3 +29,14 @@ jobs:
         run: xcodebuild -project Nibble.xcodeproj -scheme Nibble -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
       - name: Build release for iPhone (unsigned)
         run: xcodebuild -project Nibble.xcodeproj -scheme Nibble -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
+      - name: Exercise iPhone user journeys
+        run: bash Tools/test-ios.sh
+      - name: Keep iPhone test results and screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: nibble-iphone-ui-results
+          path: .build/ui-run.*
+          include-hidden-files: true
+          retention-days: 7
+          if-no-files-found: warn

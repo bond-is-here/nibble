@@ -3,6 +3,7 @@ import SwiftUI
 struct ProfileView: View {
     @EnvironmentObject private var appState: AppState
     @State private var showEdit = false
+    @State private var showMacroEditor = false
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
@@ -37,6 +38,10 @@ struct ProfileView: View {
                             .font(.system(size: 14)).foregroundStyle(Color.ink.opacity(0.7))
                     }
                     NibbleButton(title: "Tune my plan", icon: "slider.horizontal.3") { showEdit = true }
+                    Button { showMacroEditor = true } label: {
+                        Label("Tune macro mix · \(appState.macroSplit.protein)/\(appState.macroSplit.carbs)/\(appState.macroSplit.fat)", systemImage: "circle.hexagongrid")
+                            .font(.system(size: 13, weight: .semibold)).frame(minHeight: 44)
+                    }.buttonStyle(.plain).accessibilityIdentifier("macro.edit")
                 }.cardSurface(.lime)
                 if let profile = appState.profile {
                     VStack(alignment: .leading, spacing: 17) {
@@ -57,6 +62,8 @@ struct ProfileView: View {
                         .font(.system(size: 13, weight: .medium))
                     Text("No sign-up and no analytics. Barcode numbers are sent to Open Food Facts when you look up a product; your diary and body details are not sent.")
                         .font(.system(size: 12)).foregroundStyle(Color.muted).lineSpacing(3)
+                    Text("Your diary is excluded from device backups. Deleting Nibble or losing this device can lose your diary.")
+                        .font(.system(size: 12)).foregroundStyle(Color.muted).lineSpacing(3)
                     Link("Privacy policy ↗", destination: URL(string: "https://github.com/bond-is-here/nibble/blob/main/PRIVACY.md")!)
                         .font(.system(size: 13, weight: .medium))
                     Link("Help & support ↗", destination: URL(string: "https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md")!)
@@ -64,7 +71,7 @@ struct ProfileView: View {
                     DisclosureGroup("About targets & food data") {
                         VStack(alignment: .leading, spacing: 13) {
                             Text("Estimated targets use Mifflin–St Jeor resting energy × your activity level. Losing slowly subtracts up to 300 calories (at most 15%); gaining adds 250. Automated estimates have a 1,500-calorie floor. This is a product guardrail, not a personal medical minimum.")
-                            Text("Macro targets use a starting split of 25% protein, 45% carbs, and 30% fat. Calorie-only entries don’t contribute known macros. Estimates aren’t a prescription or a weight-loss guarantee.")
+                            Text("Macro targets start at 25% protein, 45% carbs, and 30% fat; customize the split in Tune macro mix. Your current mix is \(appState.macroSplit.protein)/\(appState.macroSplit.carbs)/\(appState.macroSplit.fat). Calorie-only entries don’t contribute known macros. Estimates aren’t a prescription or a weight-loss guarantee.")
                             Link("Read the original Mifflin–St Jeor study ↗", destination: URL(string: "https://pubmed.ncbi.nlm.nih.gov/2305711/")!)
                             Link("NIDDK: About adult calorie planning ↗", destination: URL(string: "https://www.niddk.nih.gov/health-information/weight-management/body-weight-planner")!)
                             Text("Generic starter foods are estimates. Product data is contributed by the Open Food Facts community; verify the package and portion. Offline, your saved foods and diary still work.")
@@ -80,6 +87,7 @@ struct ProfileView: View {
             }.foregroundStyle(Color.ink).padding(23).padding(.top, 8)
         }
         .sheet(isPresented: $showEdit) { OnboardingView(isEditing: true).phoneSheet() }
+        .sheet(isPresented: $showMacroEditor) { MacroSplitEditor().phoneSheet() }
     }
 
     private func planMacro(_ title: String, value: Double) -> some View {

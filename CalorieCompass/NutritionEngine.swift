@@ -20,6 +20,12 @@ enum NutritionEngine {
         MacroTargets(calories: calories, protein: calories * 0.25 / 4, carbs: calories * 0.45 / 4, fat: calories * 0.30 / 9)
     }
 
+    static func macroTargets(calories: Double, split: MacroSplit) -> MacroTargets {
+        let valid = split.isValid ? split : .standard
+        return MacroTargets(calories: calories, protein: calories * Double(valid.protein) / 400,
+                            carbs: calories * Double(valid.carbs) / 400, fat: calories * Double(valid.fat) / 900)
+    }
+
     static func poundsToKilograms(_ pounds: Double) -> Double { pounds / 2.20462 }
     static func kilogramsToPounds(_ kilograms: Double) -> Double { kilograms * 2.20462 }
     static func inchesToCentimeters(_ inches: Double) -> Double { inches * 2.54 }

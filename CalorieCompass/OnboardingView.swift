@@ -29,7 +29,7 @@ struct OnboardingView: View {
                 if setup { setupContent } else { welcome }
             }.padding(25).frame(maxWidth: 480)
                 .frame(maxWidth: .infinity, alignment: .top)
-        }.background(Color.canvas)
+        }.background(Color.canvas).scrollDismissesKeyboard(.interactively)
             .onAppear(perform: load)
     }
 
@@ -90,7 +90,7 @@ struct OnboardingView: View {
             else if planMode == 1 {
                 Text("Already have a daily target? Bring it with you.").font(.system(size: 15)).foregroundStyle(Color.muted)
                 LabeledInput(label: "Daily calorie target", placeholder: "e.g. 2100", text: $target, unit: "cal")
-                Text("Macro targets start at 25% protein, 45% carbs, and 30% fat.")
+                Text("Macro targets start at 25% protein, 45% carbs, and 30% fat. You can customize the mix later in You.")
                     .font(.system(size: 12)).foregroundStyle(Color.muted)
             } else {
                 NibbleMascot(color: .lilac).frame(width: 100, height: 100).rotationEffect(.degrees(-10))
@@ -181,7 +181,7 @@ struct OnboardingView: View {
             }
             success = appState.startTracking(profile: profile, units: units)
         case 1:
-            guard let calories = Double(target), calories.isFinite, (1000...6000).contains(calories) else {
+            guard let calories = Double(target.replacingOccurrences(of: ",", with: ".")), calories.isFinite, (1000...6000).contains(calories) else {
                 error = "Enter your existing daily target, between 1,000 and 6,000 calories."; return
             }
             success = appState.startTracking(profile: appState.profile, target: calories, units: units)
@@ -195,7 +195,7 @@ struct OnboardingView: View {
         guard !loaded else { return }
         loaded = true
         units = appState.archive.units
-        if let targetValue = appState.archive.calorieTarget { target = String(Int(targetValue)); planMode = 1 }
+        if let targetValue = appState.archive.calorieTarget { target = targetValue.inputString; planMode = 1 }
         else if appState.hasStarted && appState.profile == nil { planMode = 2 }
         if let profile = appState.profile {
             height = (units == .metric ? profile.heightCentimeters : profile.heightCentimeters / 2.54).shortInput

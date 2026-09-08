@@ -301,7 +301,7 @@ struct FoodPortionView: View {
                         HStack(spacing: 8) {
                             portionMacro("Protein", value: food.protein, color: .peach)
                             portionMacro("Carbs", value: food.carbs, color: .lilac)
-                            portionMacro("Fat", value: food.fat, color: .fog)
+                            portionMacro("Fat", value: food.fat, color: .lime)
                         }
                     } else {
                         Text("Calories-only entry. Macros aren’t included.").font(.system(size: 12)).foregroundStyle(Color.muted)
@@ -309,6 +309,7 @@ struct FoodPortionView: View {
                 }
                 if let error { InlineMessage(text: error) }
                 if let storageError = appState.storageError { InlineMessage(text: storageError) }
+                if let servings { MacroPortionPreview(food: food, servings: servings, entry: entry) }
                 NibbleButton(title: entry == nil ? "Add to \(meal.title.lowercased())" : "Save changes", icon: "checkmark") {
                     guard let servings else { error = "Enter an amount above zero, up to 100 servings."; return }
                     let saved: Bool
@@ -317,12 +318,12 @@ struct FoodPortionView: View {
                     if saved {
                         if let onLogged { onLogged() } else { dismiss() }
                     }
-                }.opacity(servings == nil ? 0.5 : 1)
+                }.opacity(servings == nil ? 0.5 : 1).accessibilityIdentifier("portion.save")
                 if food.source == .openFoodFacts {
                     Text("From Open Food Facts · check the label.").font(.system(size: 10)).foregroundStyle(Color.muted)
                 }
             }.foregroundStyle(Color.ink).padding(24)
-        }.background(Color.canvas)
+        }.background(Color.canvas).scrollDismissesKeyboard(.interactively)
     }
 
     private func close() { if let onClose { onClose() } else { dismiss() } }
@@ -379,7 +380,7 @@ private struct CustomFoodView: View {
                 NibbleButton(title: "Choose a portion", icon: "arrow.right", action: create)
                 Text("Saved automatically when you log it.").font(.system(size: 11)).foregroundStyle(Color.muted)
             }.padding(24).foregroundStyle(Color.ink)
-        }.background(Color.canvas)
+        }.background(Color.canvas).scrollDismissesKeyboard(.interactively)
     }
 
     private func create() {

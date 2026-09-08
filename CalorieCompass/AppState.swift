@@ -21,32 +21,35 @@ final class AppState: ObservableObject {
         self.isDemo = demo
         if demo {
             seedPreview()
-        } else if FileManager.default.fileExists(atPath: self.storageURL.path) {
-            do {
+            return
+        }
+        do {
+            try prepareStorage()
+            let legacy = try relocateLegacy(defaults)
+            if FileManager.default.fileExists(atPath: self.storageURL.path) {
                 let loaded = try JSONDecoder().decode(DiaryArchive.self, from: Data(contentsOf: self.storageURL))
                 guard Self.isValid(loaded) else {
                     throw CocoaError(.fileReadCorruptFile)
                 }
                 archive = loaded
-            } catch {
-                writable = false
-                archive = DiaryArchive()
-                storageError = "Your saved diary couldn’t be opened. The original file is preserved."
-            }
-        } else {
-            // Import the first release without deleting its saved data.
-            do {
+            } else {
                 var imported = DiaryArchive()
-                if let data = defaults.data(forKey: "calorieCompass.profile") {
+                func data(_ key: String) throws -> Data? {
+                    guard let value = legacy[key] else { return nil }
+                    guard let bytes = value as? Data else { throw CocoaError(.fileReadCorruptFile) }
+                    return bytes
+                }
+                if let data = try data("calorieCompass.profile") {
                     imported.profile = try JSONDecoder().decode(UserProfile.self, from: data)
                     imported.hasStarted = true
                 }
-                if let data = defaults.data(forKey: "calorieCompass.entries") {
+                if let data = try data("calorieCompass.entries") {
                     imported.entries = try JSONDecoder().decode([FoodLogEntry].self, from: data)
                 }
-                if let data = defaults.data(forKey: "calorieCompass.savedFoods") {
+                if let data = try data("calorieCompass.savedFoods") {
                     imported.savedFoods = try JSONDecoder().decode([FoodItem].self, from: data)
                 }
+                imported.hasStarted = imported.hasStarted || !imported.entries.isEmpty
                 guard Self.isValid(imported) else { throw CocoaError(.fileReadCorruptFile) }
                 if imported.hasStarted || !imported.entries.isEmpty || !imported.savedFoods.isEmpty {
                     if !commit(imported) {
@@ -54,21 +57,94 @@ final class AppState: ObservableObject {
                         storageError = "Your earlier diary couldn’t be saved. Its original data is preserved; free storage and reopen Nibble to retry."
                     }
                 }
-            } catch {
-                writable = false
-                storageError = "Your earlier diary couldn’t be imported. Its saved data is preserved."
             }
+        } catch {
+            writable = false
+            archive = DiaryArchive()
+            storageError = "Your saved data couldn’t be opened or protected. The original records are preserved. Free storage and reopen Nibble to retry."
         }
+    }
+
+    private var legacyURL: URL { storageURL.deletingLastPathComponent().appendingPathComponent("legacy-recovery.plist") }
+    private static let legacyKeys = ["calorieCompass.profile", "calorieCompass.entries", "calorieCompass.savedFoods"]
+
+    /// Exclude the dedicated folder before writing, so atomic replacements and recovery files
+    /// inherit the exclusion. Existing files also receive iOS complete data protection.
+    private func prepareStorage() throws {
+        let manager = FileManager.default
+        var directory = storageURL.deletingLastPathComponent()
+        try manager.createDirectory(at: directory, withIntermediateDirectories: true,
+                                    attributes: [.posixPermissions: 0o700])
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try directory.setResourceValues(values)
+        #if os(iOS)
+        try manager.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: directory.path)
+        for file in try manager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil) {
+            try manager.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: file.path)
+        }
+        #endif
+    }
+
+    private func writeProtected(_ data: Data, to url: URL) throws {
+        try prepareStorage()
+        #if os(iOS)
+        try data.write(to: url, options: [.atomic, .completeFileProtection])
+        #else
+        try data.write(to: url, options: .atomic)
+        #endif
+    }
+
+    /// Preserve the exact legacy property-list values (even malformed JSON) before removing
+    /// their backup-eligible defaults copies. The last snapshot resumes an interrupted import.
+    /// Existing diary.json always wins over these recovery records.
+    private func relocateLegacy(_ defaults: UserDefaults) throws -> [String: Any] {
+        var snapshots: [[String: Any]] = []
+        if FileManager.default.fileExists(atPath: legacyURL.path) {
+            let data = try Data(contentsOf: legacyURL)
+            guard let decoded = try PropertyListSerialization.propertyList(from: data, format: nil) as? [[String: Any]],
+                  !decoded.isEmpty else { throw CocoaError(.fileReadCorruptFile) }
+            snapshots = decoded
+        }
+        let live = Dictionary(uniqueKeysWithValues: Self.legacyKeys.compactMap { key in
+            defaults.object(forKey: key).map { (key, $0) }
+        })
+        if !live.isEmpty {
+            // A crash during defaults cleanup can leave only a subset of a saved snapshot.
+            let alreadySaved = snapshots.last.map { snapshot in
+                live.allSatisfy { key, value in
+                    guard let original = snapshot[key] else { return false }
+                    return NSDictionary(dictionary: [key: original]).isEqual(to: [key: value])
+                }
+            } ?? false
+            if !alreadySaved {
+                snapshots.append(live)
+                let bytes = try PropertyListSerialization.data(fromPropertyList: snapshots, format: .binary, options: 0)
+                try writeProtected(bytes, to: legacyURL)
+                guard try Data(contentsOf: legacyURL) == bytes else { throw CocoaError(.fileWriteUnknown) }
+            }
+            for key in live.keys { defaults.removeObject(forKey: key) }
+            // This one-time migration must flush removals before reporting completion.
+            guard defaults.synchronize() else { throw CocoaError(.fileWriteUnknown) }
+        }
+        return snapshots.last ?? [:]
     }
 
     var profile: UserProfile? { archive.profile }
     var entries: [FoodLogEntry] { archive.entries }
     var hasStarted: Bool { archive.hasStarted }
     var isPreview: Bool { isDemo }
+    var macroSplit: MacroSplit { archive.macroSplit ?? .standard }
     var targets: MacroTargets? {
-        if let calories = archive.calorieTarget { return NutritionEngine.balancedTargets(calories: calories) }
-        if let profile, profile.isValid { return NutritionEngine.targets(for: profile) }
-        return nil
+        let calories = archive.calorieTarget ?? profile.flatMap { $0.isValid ? NutritionEngine.targets(for: $0).calories : nil }
+        return calories.map { NutritionEngine.macroTargets(calories: $0, split: macroSplit) }
+    }
+    @discardableResult
+    func setMacroSplit(_ split: MacroSplit) -> Bool {
+        guard split.isValid else { return false }
+        var next = archive
+        next.macroSplit = split == .standard ? nil : split
+        return commit(next)
     }
     var selectedEntries: [FoodLogEntry] { entries(on: selectedDate) }
     var selectedTotals: DailyTotals { DailyTotals(entries: selectedEntries) }
@@ -193,10 +269,9 @@ final class AppState: ObservableObject {
         }
         do {
             if !isDemo {
-                try FileManager.default.createDirectory(at: storageURL.deletingLastPathComponent(), withIntermediateDirectories: true)
                 let encoder = JSONEncoder()
                 encoder.outputFormatting = [.sortedKeys]
-                try encoder.encode(next).write(to: storageURL, options: .atomic)
+                try writeProtected(encoder.encode(next), to: storageURL)
             }
             archive = next
             storageError = nil
@@ -210,6 +285,7 @@ final class AppState: ObservableObject {
     private static func isValid(_ data: DiaryArchive) -> Bool {
         data.version == 1
         && (data.profile.map(\.isValid) ?? true)
+        && (data.macroSplit.map(\.isValid) ?? true)
         && (data.calorieTarget.map { $0.isFinite && (1000...6000).contains($0) } ?? true)
         && data.entries.allSatisfy {
             $0.food.isValid && $0.date.timeIntervalSince1970.isFinite

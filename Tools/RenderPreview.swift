@@ -14,6 +14,11 @@ struct RenderPreview {
         try render(PhoneFrame { OnboardingView().environmentObject(demo) }, name: "nibble-welcome", output: output)
         try render(PhoneFrame { FoodPortionView(food: AppState.foodDatabase[3], initialMeal: .lunch).environmentObject(demo) }, name: "nibble-portion", output: output)
         try render(PhoneFrame { LogView().environmentObject(demo) }, name: "nibble-patterns", output: output)
+        try render(PhoneFrame { MacroMixView().environmentObject(demo) }, name: "nibble-macro-mix", output: output)
+        try render(PhoneFrame { MacroSplitEditor().environmentObject(demo) }, name: "nibble-mixing-desk", output: output)
+        try render(PhoneFrame {
+            ScrollView { MacroWeekView(week: MacroWeek(entries: demo.entries, ending: Date())).padding(23) }
+        }, name: "nibble-macro-week", output: output)
         try render(
             ZStack {
                 Color.ink
