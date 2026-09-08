@@ -345,30 +345,36 @@ final class NibbleUITests: XCTestCase {
         element.tap()
     }
 
-    private func reveal(_ element: XCUIElement, towardTop _: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+    private func reveal(_ element: XCUIElement, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         if !element.exists { _ = element.waitForExistence(timeout: 3) }
         if element.exists && element.isHittable { return }
 
-        let scroll = app.scrollViews.firstMatch
+        // Sheets can leave the underlying tab's ScrollView in the hierarchy.
+        // Drive the deepest scroll view that actually owns the target.
+        let scroll = app.scrollViews.allElementsBoundByIndex.reversed().first(where: { element.isDescendant(of: $0) })
+            ?? app.scrollViews.firstMatch
         guard scroll.exists else {
             XCTAssertTrue(false, "Control is not reachable: no scroll view for \(element)", file: file, line: line)
             return
         }
 
-        // XCUIElement.frame can remain stale while SwiftUI is updating a
-        // ScrollView, so choosing swipe direction from that frame can bounce
-        // between directions and leave compact-device targets off-screen.
-        // Normalize to the top first, then make one-direction progress through
-        // the content. The legacy towardTop label remains at call sites for
-        // readability, but the normalized search no longer needs it.
-        let maxSwipes = 16
-        for _ in 0..<maxSwipes {
+        // Choose a direction once. A target already above the viewport needs a
+        // downward drag; otherwise use the caller's explicit towardTop intent
+        // or search down the content. Short coordinate drags avoid the large
+        // jumps and bounce-back that full swipeUp/swipeDown gestures create on
+        // compact devices.
+        let targetFrame = element.frame
+        let viewport = scroll.frame
+        let targetIsAbove = !targetFrame.isEmpty && targetFrame.maxY <= viewport.minY
+        let moveTowardTop = towardTop || targetIsAbove
+        let startY: CGFloat = moveTowardTop ? 0.32 : 0.68
+        let endY: CGFloat = moveTowardTop ? 0.68 : 0.32
+        let start = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: startY))
+        let end = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: endY))
+
+        for _ in 0..<20 {
             if element.exists && element.isHittable { return }
-            scroll.swipeDown()
-        }
-        for _ in 0..<maxSwipes {
-            if element.exists && element.isHittable { return }
-            scroll.swipeUp()
+            start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0)
         }
 
         XCTAssertTrue(element.exists && element.isHittable, "Control is not reachable: \(element)\n\(app.debugDescription)", file: file, line: line)
