@@ -28,6 +28,8 @@ Looking up a typed or scanned barcode sends that barcode in an HTTPS request to 
 
 The request does not contain your saved diary, portions eaten, calorie target, age, height, weight, or other saved body-profile fields. The returned food information can be saved locally when you log or favorite it. Normal text search searches the starter library and your saved foods on the device.
 
+Barcode requests use an ephemeral networking session with HTTP caching, cookies, and credential storage disabled. Nibble does not keep a separate persistent HTTP lookup history. This does not prevent network or provider-side logging, and saved product records remain in your local diary as described above.
+
 The camera is optional and used to recognize a package barcode on the device. Nibble does not save or upload camera photos or video. You can deny or revoke camera access in iOS Settings under Privacy & Security > Camera > Nibble and type a barcode instead. Typed lookup still contacts Open Food Facts. To avoid barcode requests, use the starter library, previously saved foods, or manual food entry.
 
 See the provider's [privacy page](https://world.openfoodfacts.org/privacy) and [terms of use](https://world.openfoodfacts.org/terms-of-use). Opening external links in the app or these pages also connects to the destination website, whose own privacy practices apply.

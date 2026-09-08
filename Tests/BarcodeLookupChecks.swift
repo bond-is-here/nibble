@@ -177,7 +177,13 @@ struct BarcodeLookupChecks {
     }
 
     static func httpChecks() async throws {
-        let configuration = URLSessionConfiguration.ephemeral
+        let configuration = OpenFoodFactsClient.lookupConfiguration()
+        try expect(configuration.urlCache == nil, "Barcode responses have no HTTP cache")
+        try expect(configuration.urlCredentialStorage == nil, "Public reads have no credential storage")
+        try expect(configuration.httpCookieStorage == nil, "Barcode requests have no cookie jar")
+        try expect(!configuration.httpShouldSetCookies && configuration.httpCookieAcceptPolicy == .never,
+                   "Do not accept provider cookies")
+        try expect(configuration.requestCachePolicy == .reloadIgnoringLocalCacheData, "Ignore old cached lookups")
         configuration.protocolClasses = [FixtureURLProtocol.self]
         let session = URLSession(configuration: configuration)
         defer { session.invalidateAndCancel() }
@@ -193,6 +199,11 @@ struct BarcodeLookupChecks {
                    "Identify the app to Open Food Facts")
         try expect(request?.value(forHTTPHeaderField: "Accept") == "application/json", "Request JSON")
         try expect(request?.timeoutInterval == 12, "Bound request timeout")
+        try expect(request?.cachePolicy == .reloadIgnoringLocalCacheData, "Request cannot opt back into persistent caching")
+        try expect(request?.httpShouldHandleCookies == false, "Request cannot opt back into cookie handling")
+        try expect(request?.httpMethod == "GET" && request?.httpBody == nil, "Only a public product read is sent")
+        try expect(request?.value(forHTTPHeaderField: "Authorization") == nil && request?.value(forHTTPHeaderField: "Cookie") == nil,
+                   "No credentials or cookies are attached")
         let fields = request?.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) }?
             .queryItems?.first(where: { $0.name == "fields" })?.value
         try expect(fields?.contains("nutriments") == true && fields?.contains("product_quantity_unit") == true,

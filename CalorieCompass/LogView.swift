@@ -19,27 +19,26 @@ struct LogView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 7) {
                         Eyebrow(text: "The bigger picture")
-                        Text("Little by little.").font(.system(size: 33, weight: .semibold, design: .rounded)).tracking(-1.3)
+                        Text("Little by little.").nibbleFont(size: 33, weight: .semibold, design: .rounded).tracking(-1.3)
                     }
                     Spacer()
-                    Image(systemName: "sparkle").font(.system(size: 25))
+                    Image(systemName: "sparkle").nibbleFont(size: 25)
                 }
                 VStack(alignment: .leading, spacing: 22) {
-                    HStack(alignment: .top) {
+                    NibbleAdaptiveStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 7) {
                             Eyebrow(text: "This week", color: .ink)
-                            Text("\(loggedDays.count) / 7").font(.system(size: 44, weight: .semibold, design: .rounded)).tracking(-2)
-                            Text("days you checked in").font(.system(size: 13))
+                            Text("\(loggedDays.count) / 7").nibbleFont(size: 44, weight: .semibold, design: .rounded).tracking(-2)
+                            Text("days you checked in").nibbleFont(size: 13)
                         }
-                        Spacer()
                         NibbleMascot(color: .white.opacity(0.7), cheerful: true).frame(width: 101, height: 101).rotationEffect(.degrees(12))
                     }
                     Text("No streak to lose. Every entry is a little more awareness.")
-                        .font(.system(size: 13)).foregroundStyle(Color.ink.opacity(0.7))
+                        .nibbleFont(size: 13).foregroundStyle(Color.ink.opacity(0.7))
                 }.cardSurface(.lilac)
                 VStack(alignment: .leading, spacing: 20) {
                     SectionHeading(title: "Your week in bites")
-                    HStack(alignment: .bottom, spacing: 13) {
+                    ScrollView(.horizontal, showsIndicators: false) { HStack(alignment: .bottom, spacing: 8) {
                         ForEach(days, id: \.self) { day in
                             let total = DailyTotals(entries: appState.entries(on: day)).calories
                             let isSelected = Calendar.current.isDate(day, inSameDayAs: selectedDay)
@@ -49,27 +48,27 @@ struct LogView: View {
                                         .fill(isSelected ? Color.ink : total > 0 ? Color.lime : Color.fog)
                                         .frame(height: total > 0 ? max(10, 115 * total / maxCalories) : 5)
                                         .frame(height: 125, alignment: .bottom)
-                                    Text(String(day.shortDay.prefix(1))).font(.system(size: 11, weight: isSelected ? .bold : .regular))
+                                    Text(String(day.shortDay.prefix(1))).nibbleFont(size: 11, weight: isSelected ? .bold : .regular)
                                         .foregroundStyle(isSelected ? Color.ink : Color.muted)
-                                }.frame(maxWidth: .infinity).contentShape(Rectangle())
+                                }.frame(width: 44).contentShape(Rectangle())
                             }.buttonStyle(.plain).accessibilityLabel("\(day.shortDay), \(total.whole) calories")
                                 .accessibilityAddTraits(isSelected ? .isSelected : [])
                         }
-                    }
-                    HStack {
+                    }}.defaultScrollAnchor(.trailing)
+                    NibbleAdaptiveStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 5) {
-                            Text(average > 0 ? average.whole : "—").font(.system(size: 23, weight: .semibold, design: .rounded))
-                            Text("average on logged days").font(.system(size: 11)).foregroundStyle(Color.muted)
+                            Text(loggedDays.isEmpty ? "—" : average.whole).nibbleFont(size: 23, weight: .semibold, design: .rounded)
+                                .accessibilityIdentifier("patterns.average")
+                            Text("average on logged days").nibbleFont(size: 11).foregroundStyle(Color.muted)
                         }
-                        Spacer()
                         VStack(alignment: .trailing, spacing: 5) {
                             Text("\(appState.entries.filter { entry in days.contains { Calendar.current.isDate(entry.date, inSameDayAs: $0) } }.count)")
-                                .font(.system(size: 23, weight: .semibold, design: .rounded))
-                            Text("bites this week").font(.system(size: 11)).foregroundStyle(Color.muted)
+                                .nibbleFont(size: 23, weight: .semibold, design: .rounded)
+                            Text("bites this week").nibbleFont(size: 11).foregroundStyle(Color.muted)
                         }
                     }.padding(.top, 3)
                     Text("Unlogged days are left out. A partially logged day may make the average lower.")
-                        .font(.system(size: 10)).foregroundStyle(Color.muted)
+                        .nibbleFont(size: 10).foregroundStyle(Color.muted)
                 }.cardSurface()
                 MacroWeekView(week: MacroWeek(entries: appState.entries, ending: Date()))
                 dayDetail
@@ -84,17 +83,16 @@ struct LogView: View {
             SectionHeading(title: selectedDay.diaryTitle, detail: entries.isEmpty ? "nothing logged" : "\(totals.calories.whole) calories")
             if entries.isEmpty {
                 Text("An open page. You can add an earlier meal from the diary’s date picker.")
-                    .font(.system(size: 14)).foregroundStyle(Color.muted).cardSurface()
+                    .nibbleFont(size: 14).foregroundStyle(Color.muted).cardSurface()
             } else {
                 ForEach(entries) { entry in
-                    HStack(spacing: 12) {
+                    NibbleAdaptiveStack(spacing: 12) {
                         FoodBadge(food: entry.food, size: 42)
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(entry.food.name).font(.system(size: 13, weight: .semibold))
-                            Text("\(entry.meal.title) · \(entry.portionDescription)").font(.system(size: 11)).foregroundStyle(Color.muted)
+                            Text(entry.food.name).nibbleFont(size: 13, weight: .semibold)
+                            Text("\(entry.meal.title) · \(entry.portionDescription)").nibbleFont(size: 11).foregroundStyle(Color.muted)
                         }
-                        Spacer()
-                        Text(entry.calories.whole).font(.system(size: 15, weight: .semibold, design: .rounded))
+                        Text(entry.calories.whole).nibbleFont(size: 15, weight: .semibold, design: .rounded)
                     }.cardSurface(padding: 13)
                 }
             }

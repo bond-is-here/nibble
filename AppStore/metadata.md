@@ -43,17 +43,20 @@ Scan a package barcode or type its number to look up a product with Open Food Fa
 A DIARY THAT CAN CHANGE WITH YOUR DAY
 Edit a portion or meal, delete an entry, or undo your last diary change. Open earlier days with the date picker. Patterns shows your recent week and an average based on days you actually logged.
 
+MACROS, WITHOUT THE MATH
+Explore protein, carbs, and fat in Macro Mix. See which meals contributed, preview how a portion changes your day, and save your own target split. Unknown macros stay unknown. Optional on-device suggestions rank your saved and starter foods against remaining targets; they do not check allergies or dietary restrictions.
+
 YOUR KIND OF BALANCE
 Track without a target or adjust your plan whenever you need to. Optional calorie estimates use your age, height, weight, formula choice, activity, and direction. Metric and imperial units are supported.
 
-Your diary and saved foods are stored on your device and remain usable offline. Barcode lookup needs internet access and sends the requested barcode and ordinary network information to Open Food Facts; your saved diary and body profile are not sent. Device backups are managed separately by iOS. Nibble includes no analytics, advertising, subscriptions, or in-app purchases.
+Your diary and saved foods stay on your device and remain usable offline. Nibble excludes them from device backups and has no cloud sync; deleting the app or losing the device can lose your diary. Barcode lookup needs internet access and sends the barcode and ordinary network information to Open Food Facts, not your saved diary or body profile. Nibble includes no analytics, advertising, subscriptions, or in-app purchases.
 
 Nutrition values and targets are estimates, not medical advice or a weight-loss guarantee. Automated estimates are for adults and exclude pregnancy and breastfeeding. Check product values against the package.
 
 Product nutrition data is provided by the Open Food Facts community under the Open Database License (ODbL).
 ```
 
-Description is 1,839 characters of plain text and must remain within Apple's 4,000-character limit after edits. Promotional text and a marketing URL are optional and omitted from this draft. For a first App Store version, leave What's New unused; if this is an update to an existing Calorie Compass listing, supply an accurate change summary after verifying that record.
+Verify the description remains within Apple's 4,000-character limit after edits. Promotional text and a marketing URL are optional and omitted from this draft. For a first App Store version, leave What's New unused; if this is an update to an existing Calorie Compass listing, supply an accurate change summary after verifying that record.
 
 ## Planned public URLs
 
@@ -107,7 +110,7 @@ Nibble is a free iPhone food diary. It has no account/login, subscriptions, in-a
 
 6. You > About targets & food data explains estimates and links the calculation/data sources. Automated profiles accept ages 18-100 and describe exclusions for pregnancy/breastfeeding. The 1,500-calorie estimate floor is a product guardrail, not a clinical minimum. The macro split starts at 25% protein, 45% carbs, and 30% fat and can be customized in Tune macro mix. The app does not promise weight outcomes or offer diagnosis.
 
-The diary and optional body profile are saved locally. Barcode requests go to Open Food Facts with the barcode and standard network/request information; the saved diary and body profile are not sent. The app has no HealthKit integration. Delete removes an individual diary entry; saved foods and earlier migration records remain. All data in the current app container can be removed with iOS Settings > General > iPhone Storage > Nibble > Delete App. Device backups are managed separately.
+The diary and optional body profile are saved locally in a backup-excluded folder, with complete file protection on iOS. Barcode requests go to Open Food Facts with the barcode and standard network/request information; the saved diary and body profile are not sent. The app has no HealthKit integration or cloud sync. Delete removes an individual diary entry; saved foods and earlier migration records remain. All data in the current app container can be removed with iOS Settings > General > iPhone Storage > Nibble > Delete App. Removing the app or losing the device can lose the diary. Earlier external backup copies remain outside the app's control.
 ```
 
 The source now includes privacy/support links under You; add that location to the review notes after the pages are public and the links have passed device verification. Do not present the macOS `--demo` preview as the submitted iPhone app or claim these flows have passed device testing. If used during development, `--demo` keeps sample data in memory; submission must be verified with a normal launch and persistent storage.

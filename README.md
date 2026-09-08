@@ -47,7 +47,7 @@ Regenerates the actual SwiftUI screen previews, design board, and opaque 1024 px
 bash Tools/check.sh
 ```
 
-Checks project metadata, shared SwiftUI code, diary/storage behavior, nutrition arithmetic, and barcode decoding/HTTP failures. The Macro Mix suite covers coverage, energy shares, suggestion eligibility/ranking, live portion previews, DST-safe weekly grouping, old-archive compatibility, and transactional preference storage. Executable tests need no third-party dependencies.
+Checks project metadata, shared SwiftUI code, diary/storage behavior, nutrition arithmetic, and barcode decoding/HTTP failures. The Macro Mix suite covers coverage, energy shares, suggestion eligibility/ranking, live portion previews, DST-safe weekly grouping, old-archive compatibility, and transactional preference storage. Swift checks use standard Apple frameworks; the shell result-reporting checks also require `jq`.
 
 With full Xcode and an installed iPhone Simulator runtime:
 
@@ -55,7 +55,15 @@ With full Xcode and an installed iPhone Simulator runtime:
 bash Tools/test-ios.sh
 ```
 
-The `NibbleUITests` target drives onboarding, quick logging, delete/Undo, portion previews and editing, custom calorie-only foods, manual targets, custom macro splits, and persistence across process relaunches. Each test gets a unique UUID-scoped diary and defaults suite through a **Debug-only** launch hook. Normal diaries are never erased or reused. Results, logs, and final-screen attachments are retained under `.build/ui-run.*`; set `NIBBLE_SIMULATOR_ID` to test another installed simulator. The script requires `jq` for automatic simulator selection. Tests use local foods, not the live barcode service.
+The `NibbleUITests` target drives onboarding, quick logging, delete/Undo, portion previews and editing, custom calorie-only foods, manual targets, custom macro splits, adult-estimate validation, metric profile persistence, barcode-error/manual-label fallback, milliliter portions, favorites, zero-calorie averages, and persistence across process relaunches. A largest-text journey also exercises onboarding → logging → Macro Mix with clipping, description, and contrast audits. Each test gets a unique UUID-scoped diary and defaults suite through a **Debug-only** launch hook; the large-text override is limited to those launches and absent from Release behavior. Normal diaries are never erased or reused. Results, logs, exported screenshots, and the test-summary JSON are retained under `.build/ui-run.*`; set `NIBBLE_SIMULATOR_ID` to test another installed simulator. The script requires `jq` for automatic simulator selection. Tests use local foods and an invalid GTIN, not the live barcode service.
+
+Two additional barcode journeys install fake delayed-product/offline transports only for UUID-isolated Debug test launches. They exercise the real URLSession and decoder: a pending lookup must not replace a manual draft, and a successfully logged product must remain reusable after relaunch with new requests failing offline. They send no request to the public provider; the transport override and fixtures are absent from Release.
+
+After exporting an iPhone test summary, CI publishes exact pass/fail/skip counts and up to ten named failure messages as PR-check annotations. The full summary, logs, and screenshots remain in the artifact. Reporter checks verify workflow-command escaping and ensure missing counts are shown as unknown, not zero.
+
+For compact-screen QA, run `NIBBLE_SIMULATOR_KIND=compact bash Tools/test-ios.sh`. This creates a uniquely named iPhone SE (3rd generation) simulator using the newest installed available iOS runtime; it does not erase or reuse an existing device. The selected runtime must support that device. Simulator creation is test preparation, not proof that the tests pass.
+
+Text uses Dynamic Type scaling. Macro and form rows stack at accessibility sizes, the food picker scrolls as a whole, and the portion Save action stays in a bottom bar. Shared palette checks require at least 4.5:1 contrast for ink and muted text on the six app surfaces. They do not replace device audits, VoiceOver testing, or testing all OS/text-size combinations. `bash Tools/render.sh .build/accessibility-preview` renders optional macOS layout previews without replacing the shipped icon; macOS previews do not verify iOS font metrics.
 
 Optional live network check:
 
@@ -64,7 +72,7 @@ swiftc -swift-version 5 CalorieCompass/Models.swift CalorieCompass/OpenFoodFacts
 .build/live-barcode 3017620422003
 ```
 
-The [GitHub Actions workflow](https://github.com/bond-is-here/nibble/actions/workflows/ios.yml) runs on a standard macOS 26 runner and checks for an iOS 26+ SDK, runs the shared checks, builds both the iPhone Simulator Debug and unsigned iPhone Release configurations, and runs the iPhone UI journeys. UI results are retained as a workflow artifact for seven days, including failed runs. Check the latest run for actual results; configuring tests is not evidence they passed. The original build-only checks passed in [run 34000992086](https://github.com/bond-is-here/nibble/actions/runs/34000992086). Simulator tests do not prove physical camera behavior, accessibility across devices, or signed distribution readiness. Local shared-code checks and a Mac preview are available through Command Line Tools; full iPhone builds require Xcode’s first-launch license/setup and an iPhone SDK.
+The [GitHub Actions workflow](https://github.com/bond-is-here/nibble/actions/workflows/ios.yml) uses standard macOS 26 runners for regular and compact iPhone jobs. Each checks for an iOS 26+ SDK, runs the shared checks, builds both the iPhone Simulator Debug and unsigned iPhone Release configurations, and runs the iPhone UI journeys. UI results are retained as separate `standard` and `compact` workflow artifacts for seven days, including failed runs; one job's failure does not cancel the other. Check the latest run for actual results; configuring tests is not evidence they passed. The original build-only checks passed in [run 34000992086](https://github.com/bond-is-here/nibble/actions/runs/34000992086). Simulator tests do not prove physical camera behavior, accessibility across devices, or signed distribution readiness. Local shared-code checks and a Mac preview are available through Command Line Tools; full iPhone builds require Xcode’s first-launch license/setup and an iPhone SDK.
 
 ## App Store preparation
 
@@ -79,6 +87,8 @@ No purchase, enrollment, signed upload, or App Store submission has been perform
 `AppState` saves a versioned JSON archive under Application Support/Nibble using atomic writes. In-memory state changes only after saving succeeds. The dedicated folder is excluded from device backups before writes, and iOS files use complete file protection. Earlier Calorie Compass values are copied and verified in a protected `legacy-recovery.plist` before removing the three legacy defaults keys. Interrupted migration can resume from that copy; a current diary always wins. Unreadable originals are preserved and surfaced as a storage error. Earlier external backup copies remain outside the app's control.
 
 No account, analytics, or cloud sync is included. Barcode lookup sends the barcode to Open Food Facts; the diary and body profile are not uploaded. The app includes a privacy manifest for its own UserDefaults access.
+
+Barcode networking uses an ephemeral session without cookies, credentials, or an HTTP cache. Only products you log or favorite are retained in the protected archive; provider-side request handling remains a separate release/privacy verification gate.
 
 Calorie estimates use [Mifflin–St Jeor](https://pubmed.ncbi.nlm.nih.gov/2305711/) with common activity factors and a modest directional adjustment. Nibble's 1,500-calorie floor is an application guardrail, not a clinical minimum. Macro targets start with a transparent 25/45/30 energy split, customizable in the mixing desk. The estimate flow is limited to adults and describes its limitations, consistent with [NIDDK's adult planning guidance](https://www.niddk.nih.gov/health-information/weight-management/body-weight-planner).
 

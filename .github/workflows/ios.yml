@@ -13,6 +13,12 @@ jobs:
   verify:
     runs-on: macos-26
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        form_factor: [standard, compact]
+    env:
+      NIBBLE_SIMULATOR_KIND: ${{ matrix.form_factor }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -33,9 +39,9 @@ jobs:
         run: bash Tools/test-ios.sh
       - name: Keep iPhone test results and screenshots
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1, Node 24
         with:
-          name: nibble-iphone-ui-results
+          name: nibble-iphone-ui-results-${{ matrix.form_factor }}
           path: .build/ui-run.*
           include-hidden-files: true
           retention-days: 7
