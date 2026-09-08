@@ -11,3 +11,5 @@ xcrun swiftc -swift-version 5 -warnings-as-errors CalorieCompass/Models.swift Ca
 .build/barcode-checks
 xcrun swiftc -swift-version 5 -warnings-as-errors CalorieCompass/Models.swift CalorieCompass/NutritionEngine.swift CalorieCompass/AppState.swift CalorieCompass/MacroEngine.swift Tests/MacroChecks.swift -o .build/macro-checks
 .build/macro-checks
+xcrun swiftc -swift-version 5 -warnings-as-errors CalorieCompass/Models.swift CalorieCompass/NutritionEngine.swift CalorieCompass/AppState.swift Tests/StorageProtectionChecks.swift -o .build/storage-checks
+.build/storage-checks

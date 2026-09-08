@@ -53,7 +53,7 @@ Use the [latest workflow result](https://github.com/bond-is-here/nibble/actions/
 - [ ] Confirm GitHub Issues is an acceptable support route for the intended territories/review and supply any additional actual contact information required by the [Support URL field](https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information). Warn against posting personal health information publicly.
 - [ ] Verify Open Food Facts' handling of barcode requests, source IPs, logs, retention, purpose, and linkage. Its privacy page was bot-blocked during preparation; no retention guarantee has been established.
 - [ ] Complete App Privacy using [Apple's definitions](https://developer.apple.com/app-store/app-privacy-details/) and the [code evidence](metadata.md#app-privacy-preparation--declaration-remains-open). Do not choose Data Not Collected just because the diary is local. Reconcile any retained provider/support data with the manifest and policy.
-- [ ] Resolve health-data backup handling. The app currently writes diary/profile data under Application Support and retains legacy UserDefaults without explicit backup exclusion. Review both stores against [Guideline 5.1.3(ii)](https://developer.apple.com/app-store/review/guidelines/) and [Apple's backup guidance](https://developer.apple.com/documentation/foundation/optimizing-your-app-s-data-for-icloud-backup). This is an open release gap, not an assertion of compliance. Update code/tests and policy together; preserve the caveat for historical backup copies.
+- [ ] Verify health-data storage protections on a physical iPhone. The dedicated storage folder now excludes diary/profile and migration recovery records from backups; iOS writes use complete file protection. Legacy UserDefaults values move to a verified recovery file before removal, including on already-migrated installations. Test lock/unlock, migration, and a device backup against [Guideline 5.1.3(ii)](https://developer.apple.com/app-store/review/guidelines/) and [Apple's backup guidance](https://developer.apple.com/documentation/foundation/optimizing-your-app-s-data-for-icloud-backup). Existing external backup copies remain outside the app's control.
 - [ ] Verify deletion instructions: removing an entry retains its saved food and legacy migration records; Delete App removes the current app container, while Offload App keeps data. Backups and third-party support records are separate. The app creates no HealthKit records.
 
 ## 4. Listing, screenshots, and submission
@@ -72,6 +72,14 @@ Recheck linked requirements at the actual submission date.
 - [x] Macro rings/details, saved split editor, local suggestion engine, portion preview, and weekly macro patterns implemented.
 - [x] Local shared SwiftUI typecheck, existing 750 assertions/checks, and 329 new Macro Mix checks passed.
 - [x] Native macOS design previews rendered and visually inspected. These remain design previews, not iOS screenshots.
-- [ ] Verify this update's full iOS build and runtime after completing Xcode's first-launch license/setup. Prior CI evidence above covers build 2, not these new changes.
+- [x] Macro Mix at commit `4232629` passed both iOS build configurations in [CI run 34177188557](https://github.com/bond-is-here/nibble/actions/runs/34177188557).
+- [ ] Verify iPhone runtime after completing Xcode's first-launch license/setup. Check the newest commit's CI separately after each functional change.
 - [ ] Test tap-to-explore, switching macro focus, save/cancel/reset/invalid splits, scaled gram targets, partial/no-target/history states, and suggestions → portion → save on iPhone.
 - [ ] Verify existing-diary upgrade, reduced motion, small screens, larger text, and VoiceOver. Recheck all earlier release/privacy gates; this update does not resolve them automatically.
+
+## Storage hardening
+
+- [x] Exclude the Nibble folder from backups before storing health data; use complete file protection for iOS writes and existing files.
+- [x] Preserve and verify original legacy property-list values in protected recovery storage before removing the three UserDefaults values. Interrupted cleanup resumes, malformed records stay recoverable, and existing JSON takes precedence.
+- [x] All 1,079 diary/barcode/macro assertions and 28 protected-storage checks passed locally, including failed writes, migration retries, actual backup-exclusion metadata, and demo isolation.
+- [ ] Confirm this commit's iOS CI, then verify protection during physical-device lock/unlock and backup. These local checks do not exercise iOS data-protection behavior.

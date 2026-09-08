@@ -181,7 +181,7 @@ struct OnboardingView: View {
             }
             success = appState.startTracking(profile: profile, units: units)
         case 1:
-            guard let calories = Double(target), calories.isFinite, (1000...6000).contains(calories) else {
+            guard let calories = Double(target.replacingOccurrences(of: ",", with: ".")), calories.isFinite, (1000...6000).contains(calories) else {
                 error = "Enter your existing daily target, between 1,000 and 6,000 calories."; return
             }
             success = appState.startTracking(profile: appState.profile, target: calories, units: units)
@@ -195,7 +195,7 @@ struct OnboardingView: View {
         guard !loaded else { return }
         loaded = true
         units = appState.archive.units
-        if let targetValue = appState.archive.calorieTarget { target = String(Int(targetValue)); planMode = 1 }
+        if let targetValue = appState.archive.calorieTarget { target = targetValue.inputString; planMode = 1 }
         else if appState.hasStarted && appState.profile == nil { planMode = 2 }
         if let profile = appState.profile {
             height = (units == .metric ? profile.heightCentimeters : profile.heightCentimeters / 2.54).shortInput

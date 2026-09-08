@@ -71,7 +71,7 @@ GitHub Issues is the planned public contact channel; never invent an email addre
 
 The code supports these observations:
 
-- `AppState.swift` stores diary, foods, preferences, and an optional profile locally; migration retains earlier UserDefaults records. `Models.swift` defines the saved fields. There is no HealthKit integration or developer cloud sync.
+- `AppState.swift` stores diary, foods, preferences, and an optional profile locally in a backup-excluded folder with complete file protection on iOS. Migration preserves earlier records in a verified local recovery file before removing the three old UserDefaults values. `Models.swift` defines the saved fields. There is no HealthKit integration or developer cloud sync.
 - `OpenFoodFactsClient.swift` sends a barcode in an HTTPS product request, plus a Nibble/version User-Agent. No stored diary or profile is included. The receiving provider also sees source IP and other request information.
 - `BarcodeScannerView.swift` recognizes barcode metadata locally; it does not upload images. No analytics, ad, or third-party crash SDK appears in the source.
 - `PrivacyInfo.xcprivacy` currently declares no tracking, an empty collected-data list, and UserDefaults reason `CA92.1`. That file is evidence of the present declaration, not validation of third-party retention or the final App Store privacy label.

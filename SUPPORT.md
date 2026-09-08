@@ -53,4 +53,6 @@ To intentionally erase all local Nibble information, open Settings > General > i
 
 ## Price and privacy
 
+The diary and retained migration records are kept in a local folder excluded from device backups. They use complete file protection on iOS. If you see a storage protection error, unlock the device, check free storage, and reopen Nibble. An unreadable original is preserved; do not uninstall as a troubleshooting step unless you intend to erase your data. Older backup copies are managed separately through iOS or your computer. The app has no automatic cloud recovery if the device is lost.
+
 This release is planned as a free app with no subscriptions or in-app purchases. Nibble has no sign-up, app analytics, or app cloud sync. Barcode lookups contact Open Food Facts and expose the barcode and ordinary network information to that provider. See the [privacy policy](PRIVACY.md) for storage, third-party requests, support posts, and deletion details.

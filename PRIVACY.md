@@ -1,6 +1,6 @@
 # Nibble privacy policy
 
-Last updated: September 5, 2026
+Last updated: September 7, 2026
 
 This policy describes the Nibble iPhone app in this repository, including its migration from Calorie Compass. Nibble is a food diary with optional calorie and macro targets. It does not require a Nibble account.
 
@@ -14,7 +14,9 @@ Nibble stores the information you enter so it can display your diary, calculate 
 
 The app saves these records in a JSON file at `Application Support/Nibble/diary.json` inside its app container. It has no developer-operated diary server or app cloud-sync feature. Your saved diary and body profile are not included in barcode requests or otherwise uploaded by the app. Device backups are a separate matter, described below.
 
-When an existing Calorie Compass installation is upgraded and no Nibble archive exists, Nibble imports the original `calorieCompass.profile`, `calorieCompass.entries`, and `calorieCompass.savedFoods` UserDefaults data. These original records are retained on the device after migration. An unreadable archive or failed migration is preserved and reported as a storage error rather than silently discarded.
+When an existing Calorie Compass installation is upgraded, Nibble moves the original `calorieCompass.profile`, `calorieCompass.entries`, and `calorieCompass.savedFoods` UserDefaults records into `Application Support/Nibble/legacy-recovery.plist`. It verifies the recovery copy before removing those three defaults values. This also handles installations already migrated to Nibble. If no current diary archive exists, Nibble imports the recovery records; a current archive always takes precedence. Unreadable records remain preserved and produce a storage error.
+
+The Nibble storage folder, including the diary and migration recovery records, is excluded from future device backups. On iOS these files use complete file protection, which restricts access while the device is locked. New writes require the storage protections to succeed. Losing or deleting the app/device can therefore lose the diary; Nibble does not provide automatic cloud recovery. Copies created by older versions may remain in existing backups, as described below.
 
 Nibble does not read from or write to Apple Health or HealthKit. Its locally saved nutrition and body information is app data; it is not an Apple Health database.
 

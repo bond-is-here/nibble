@@ -62,6 +62,8 @@ struct ProfileView: View {
                         .font(.system(size: 13, weight: .medium))
                     Text("No sign-up and no analytics. Barcode numbers are sent to Open Food Facts when you look up a product; your diary and body details are not sent.")
                         .font(.system(size: 12)).foregroundStyle(Color.muted).lineSpacing(3)
+                    Text("Your diary is excluded from device backups. Deleting Nibble or losing this device can lose your diary.")
+                        .font(.system(size: 12)).foregroundStyle(Color.muted).lineSpacing(3)
                     Link("Privacy policy ↗", destination: URL(string: "https://github.com/bond-is-here/nibble/blob/main/PRIVACY.md")!)
                         .font(.system(size: 13, weight: .medium))
                     Link("Help & support ↗", destination: URL(string: "https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md")!)
