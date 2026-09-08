@@ -115,8 +115,9 @@ Recheck linked requirements at the actual submission date.
 - [x] Replace decorative text symbols that rendered as green emoji tiles on iOS with accessibility-hidden SF Symbols.
 - [x] In [run 34179784015](https://github.com/bond-is-here/nibble/actions/runs/34179784015), shared checks and both iOS builds passed. The expanded UI run failed on the estimate's formatted `2,100` label and the macro field's retained `25` during replacement. Neither incomplete journey is certified.
 - [x] Correct the locale-specific display expectation and use the iOS Select All editing action for percentage replacement instead of assuming the caret position.
-- [ ] Verify the new commit's complete simulator result and inspect its sticky-button screenshots. Physical-device, accessibility, privacy, signing, and account gates remain open.
+- [x] Verify the new commit's complete simulator result and inspect its sticky-button screenshots (evidence below). Physical-device, accessibility, privacy, signing, and account gates remain open.
 - [x] Follow-up commit `febc521` passed shared checks, both iOS builds, and the UI-test step in [run 34181081328](https://github.com/bond-is-here/nibble/actions/runs/34181081328). This result predates the Dynamic Type changes below.
+- [x] Download and verify that run's artifact digest, read its summary (7 passed, 0 failed, 0 skipped on iPhone Air / iOS 26.2), and inspect actual iPhone screenshots of the visible portion Save, saved 30/40/30 split, 200 ml manual-label preview, and zero-calorie average.
 
 ## Dynamic Type and compact-screen pass
 
@@ -126,5 +127,6 @@ Recheck linked requirements at the actual submission date.
 - [x] Inspect macOS previews of regular and accessibility-layout diary, portion, and Macro Mix screens. They verify shared layout branching, not iOS font scaling or VoiceOver.
 - [x] Add a largest-text iPhone journey with real isolated persistence, a scaling assertion, visible portion Save, and XCTest clipping/description/contrast audits. Add independent regular and SE-sized CI jobs without cancelling one on the other's failure.
 - [ ] Run and inspect both eight-journey jobs and their actual iOS screenshots after this pass. An audit of one visible screen does not certify whole-app accessibility; complete VoiceOver, intermediate text sizes, older supported iOS versions, and physical-device gates above.
+- [x] The first matrix run (`34182133064`) exposed a Debug-only compiler error: Reduce Motion is a read-only environment value. Remove the attempted test override; app behavior continues to read the real system preference. Add a Debug shared-code typecheck so test-only branches are checked locally as well. Re-run both iPhone jobs; no accessibility runtime result exists from this failed build.
 
 Implementation follows Apple's [Dynamic Type guidance](https://developer.apple.com/videos/play/wwdc2024/10074/) and [XCTest accessibility audit guidance](https://developer.apple.com/documentation/accessibility/performing-accessibility-audits-for-your-app). Do not treat implemented support or configured audits as a passed release gate.

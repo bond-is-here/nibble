@@ -43,7 +43,7 @@ private struct NibbleUITestAppearance: ViewModifier {
         #if DEBUG
         if let id = ProcessInfo.processInfo.environment["NIBBLE_UI_TEST_ID"], UUID(uuidString: id) != nil,
            ProcessInfo.processInfo.environment["NIBBLE_UI_TEST_TEXT_SIZE"] == "accessibility5" {
-            content.dynamicTypeSize(.accessibility5).environment(\.accessibilityReduceMotion, true)
+            content.dynamicTypeSize(.accessibility5)
         } else { content }
         #else
         content
