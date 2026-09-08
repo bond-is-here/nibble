@@ -44,6 +44,10 @@ struct AddFoodView: View {
             }
         }
         .background(Color.canvas)
+        // Keep an in-progress label or portion edit on screen. This prevents a
+        // compact-device scroll gesture from dismissing the entire Add Food
+        // sheet and losing the person's draft.
+        .interactiveDismissDisabled(showCustom || selectedFood != nil)
         .sheet(isPresented: $showScanner) {
             ZStack(alignment: .topTrailing) {
                 BarcodeScannerView { code in
