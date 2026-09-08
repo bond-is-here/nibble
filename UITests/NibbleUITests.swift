@@ -345,30 +345,32 @@ final class NibbleUITests: XCTestCase {
         element.tap()
     }
 
-    private func reveal(_ element: XCUIElement, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+    private func reveal(_ element: XCUIElement, towardTop _: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         if !element.exists { _ = element.waitForExistence(timeout: 3) }
-        // SwiftUI can leave an element in the accessibility tree while it is
-        // far outside the viewport. Always swiping in one direction made the
-        // compact device tests overshoot targets above the current position.
-        // Use the element's frame to choose the direction on every pass.
-        for _ in 0..<16 {
-            if element.exists && element.isHittable { return }
-            let scroll = app.scrollViews.firstMatch
-            guard scroll.exists else { break }
-            let viewport = scroll.frame.isEmpty ? app.windows.firstMatch.frame : scroll.frame
-            let top = viewport.minY + 12
-            let bottom = viewport.maxY - 12
-            let frame = element.frame
-            if frame.maxY < top {
-                scroll.swipeDown()
-            } else if frame.minY > bottom {
-                scroll.swipeUp()
-            } else if towardTop {
-                scroll.swipeDown()
-            } else {
-                scroll.swipeUp()
-            }
+        if element.exists && element.isHittable { return }
+
+        let scroll = app.scrollViews.firstMatch
+        guard scroll.exists else {
+            XCTAssertTrue(false, "Control is not reachable: no scroll view for \(element)", file: file, line: line)
+            return
         }
+
+        // XCUIElement.frame can remain stale while SwiftUI is updating a
+        // ScrollView, so choosing swipe direction from that frame can bounce
+        // between directions and leave compact-device targets off-screen.
+        // Normalize to the top first, then make one-direction progress through
+        // the content. The legacy towardTop label remains at call sites for
+        // readability, but the normalized search no longer needs it.
+        let maxSwipes = 16
+        for _ in 0..<maxSwipes {
+            if element.exists && element.isHittable { return }
+            scroll.swipeDown()
+        }
+        for _ in 0..<maxSwipes {
+            if element.exists && element.isHittable { return }
+            scroll.swipeUp()
+        }
+
         XCTAssertTrue(element.exists && element.isHittable, "Control is not reachable: \(element)\n\(app.debugDescription)", file: file, line: line)
     }
 }
