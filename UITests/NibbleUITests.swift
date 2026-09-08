@@ -352,11 +352,16 @@ final class NibbleUITests: XCTestCase {
         // Sheets can leave the underlying tab's ScrollView in the hierarchy.
         // Drive the deepest scroll view that contains the target's accessibility
         // identity. XCTest does not expose a parent pointer for XCUIElement.
-        let targetPredicate = NSPredicate(
-            format: "identifier == %@ OR label == %@",
-            element.identifier,
-            element.label
-        )
+        let targetPredicate: NSPredicate
+        if element.identifier.isEmpty {
+            targetPredicate = NSPredicate(format: "label == %@", element.label)
+        } else {
+            targetPredicate = NSPredicate(
+                format: "identifier == %@ OR label == %@",
+                element.identifier,
+                element.label
+            )
+        }
         let scroll = app.scrollViews.containing(targetPredicate).allElementsBoundByIndex.last
             ?? app.scrollViews.firstMatch
         guard scroll.exists else {
@@ -370,7 +375,7 @@ final class NibbleUITests: XCTestCase {
         // jumps and bounce-back that full swipeUp/swipeDown gestures create on
         // compact devices.
         let targetFrame = element.frame
-        let viewport = scroll.frame
+        let viewport = scroll.frame.isEmpty ? app.windows.firstMatch.frame : scroll.frame
         let targetIsAbove = !targetFrame.isEmpty && targetFrame.maxY <= viewport.minY
         let moveTowardTop = towardTop || targetIsAbove
         let startY: CGFloat = moveTowardTop ? 0.32 : 0.68
