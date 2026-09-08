@@ -370,12 +370,21 @@ final class NibbleUITests: XCTestCase {
         // element type and accessibility identity. XCTest does not expose a
         // parent pointer for XCUIElement, and SwiftUI can reuse labels such as
         // "0" across unrelated text and text fields.
-        let scroll = app.scrollViews.allElementsBoundByIndex.reversed().first { candidate in
+        let scrollViews = app.scrollViews.allElementsBoundByIndex
+        let scroll = scrollViews.reversed().first { candidate in
             candidate.descendants(matching: element.elementType).allElementsBoundByIndex.contains { descendant in
                 if !element.identifier.isEmpty { return descendant.identifier == element.identifier }
                 return descendant.label == element.label
             }
         }
+            // If SwiftUI merges the target into an ancestor, prefer the
+            // frontmost full-height scroll view. A sheet can sit above the
+            // dashboard, so the first scroll view may belong to the hidden
+            // tab and send gestures to the wrong surface.
+            ?? scrollViews.reversed().first { candidate in
+                let frame = candidate.frame
+                return !frame.isEmpty && frame.height >= 200
+            }
             ?? app.scrollViews.firstMatch
         guard scroll.exists else {
             XCTAssertTrue(false, "Control is not reachable: no scroll view for \(element)", file: file, line: line)
