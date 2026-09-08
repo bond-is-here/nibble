@@ -336,6 +336,22 @@ final class NibbleUITests: XCTestCase {
             }
             field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: text.count) + value)
         }
+        // Compact simulators can deliver the final key event a beat after
+        // typeText returns. If the field contains a partial prefix, append the
+        // missing suffix; otherwise retry the full replacement from a fresh
+        // caret position before reporting a real failure.
+        for _ in 0..<2 {
+            let typed = field.value as? String ?? ""
+            if typed == value { break }
+            field.tap()
+            if value.hasPrefix(typed) {
+                field.typeText(String(value.dropFirst(typed.count)))
+            } else {
+                field.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+                field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: typed.count) + value)
+            }
+            _ = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", value), object: field)], timeout: 1)
+        }
         XCTAssertEqual(field.value as? String, value, file: file, line: line)
     }
 
@@ -356,11 +372,7 @@ final class NibbleUITests: XCTestCase {
         if element.identifier.isEmpty {
             targetPredicate = NSPredicate(format: "label == %@", element.label)
         } else {
-            targetPredicate = NSPredicate(
-                format: "identifier == %@ OR label == %@",
-                element.identifier,
-                element.label
-            )
+            targetPredicate = NSPredicate(format: "identifier == %@", element.identifier)
         }
         let scroll = app.scrollViews.containing(targetPredicate).allElementsBoundByIndex.last
             ?? app.scrollViews.firstMatch
