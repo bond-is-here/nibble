@@ -18,10 +18,7 @@ final class NibbleUITests: XCTestCase {
 
     override func tearDownWithError() throws {
         if let app {
-            let screenshot = XCTAttachment(screenshot: app.screenshot())
-            screenshot.name = name
-            screenshot.lifetime = .keepAlways
-            add(screenshot)
+            capture(name)
             app.terminate()
         }
     }
@@ -50,6 +47,7 @@ final class NibbleUITests: XCTestCase {
         expectLabel(app.staticTexts["macro.preview.after.protein"], "40 g")
         expectLabel(app.staticTexts["macro.preview.after.carbs"], "16 g")
         expectLabel(app.staticTexts["macro.preview.after.fat"], "8 g")
+        capture("Two-serving macro preview")
         tap(app.buttons["portion.save"])
         expectCalories("300")
 
@@ -83,6 +81,7 @@ final class NibbleUITests: XCTestCase {
         replace(app.textFields["Carbs target percentage"], with: "40", towardTop: true)
         tap(app.buttons["Save my mix"])
         XCTAssertEqual(app.buttons["macro.edit"].label, "Tune macro mix · 30/40/30")
+        capture("Saved custom macro mix")
 
         relaunch()
         tap(app.buttons["You"])
@@ -112,6 +111,7 @@ final class NibbleUITests: XCTestCase {
         tap(app.buttons["Explore your macro mix"])
         reveal(app.staticTexts["A few pieces are missing."])
         XCTAssertTrue(app.staticTexts["A few pieces are missing."].exists)
+        capture("Calorie-only macros stay unknown")
         tap(app.buttons["Close macro mix"], towardTop: true)
         relaunch()
         expectCalories("275")
@@ -126,6 +126,13 @@ final class NibbleUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.buttons["Add food"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["Just start logging"].exists)
+    }
+
+    private func capture(_ title: String) {
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = title
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
     }
 
     private func expectCalories(_ value: String, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
@@ -144,6 +151,11 @@ final class NibbleUITests: XCTestCase {
         field.tap()
         let previous = field.value as? String ?? ""
         let text = previous == field.placeholderValue ? "" : previous
+        if !text.isEmpty {
+            // A center tap can place the caret before right-aligned percentages.
+            // Move to the trailing edge before deleting the existing value.
+            field.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+        }
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: text.count) + value)
         XCTAssertEqual(field.value as? String, value, file: file, line: line)
     }
@@ -155,7 +167,7 @@ final class NibbleUITests: XCTestCase {
     }
 
     private func reveal(_ element: XCUIElement, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
-        _ = element.waitForExistence(timeout: 3)
+        if !element.exists { _ = element.waitForExistence(timeout: 3) }
         for _ in 0..<8 {
             if element.exists && element.isHittable { return }
             let scroll = app.scrollViews.firstMatch

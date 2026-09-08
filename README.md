@@ -80,6 +80,8 @@ No purchase, enrollment, signed upload, or App Store submission has been perform
 
 No account, analytics, or cloud sync is included. Barcode lookup sends the barcode to Open Food Facts; the diary and body profile are not uploaded. The app includes a privacy manifest for its own UserDefaults access.
 
+Barcode networking uses an ephemeral session without cookies, credentials, or an HTTP cache. Only products you log or favorite are retained in the protected archive; provider-side request handling remains a separate release/privacy verification gate.
+
 Calorie estimates use [Mifflin–St Jeor](https://pubmed.ncbi.nlm.nih.gov/2305711/) with common activity factors and a modest directional adjustment. Nibble's 1,500-calorie floor is an application guardrail, not a clinical minimum. Macro targets start with a transparent 25/45/30 energy split, customizable in the mixing desk. The estimate flow is limited to adults and describes its limitations, consistent with [NIDDK's adult planning guidance](https://www.niddk.nih.gov/health-information/weight-management/body-weight-planner).
 
 Macro shares use 4 cal/g for protein and carbs, 9 cal/g for fat; label calorie totals remain separate and may differ due to rounding, fiber, alcohol, or other factors. All insights are deterministic and local, not an AI nutritionist or a clinical recommendation. Current targets are used for historical comparisons; targets are not archived per day. Optional macro preferences remain compatible with existing version-one diaries.

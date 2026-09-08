@@ -41,9 +41,23 @@ enum FoodLookupError: LocalizedError, Equatable {
 
 struct OpenFoodFactsClient {
     private let session: URLSession
+    private static let lookupSession = URLSession(configuration: lookupConfiguration())
 
-    init(session: URLSession = .shared) {
-        self.session = session
+    init(session: URLSession? = nil) {
+        self.session = session ?? Self.lookupSession
+    }
+
+    /// Public nutrition reads need no persistent cookies, credentials, or HTTP cache.
+    /// Logged/favorited products remain available through the protected diary archive.
+    static func lookupConfiguration() -> URLSessionConfiguration {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.urlCache = nil
+        configuration.urlCredentialStorage = nil
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        configuration.httpCookieAcceptPolicy = .never
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        return configuration
     }
 
     func lookup(barcode: String) async throws -> FoodItem {
@@ -58,9 +72,9 @@ struct OpenFoodFactsClient {
         )]
         guard let url = components.url else { throw FoodLookupError.invalidBarcode }
 
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 12
-        request.setValue("Nibble/1.0 (iOS nutrition tracker)", forHTTPHeaderField: "User-Agent")
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 12)
+        request.httpShouldHandleCookies = false
+        request.setValue("Nibble/1.0 (+https://github.com/bond-is-here/nibble)", forHTTPHeaderField: "User-Agent")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         let data: Data

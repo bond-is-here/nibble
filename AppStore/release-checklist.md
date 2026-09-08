@@ -52,6 +52,7 @@ Use the [latest workflow result](https://github.com/bond-is-here/nibble/actions/
 - [ ] Verify in-app Privacy policy and Help & support links under You on the release candidate. Apple requires an accessible policy in both the app and store metadata. [Review Guidelines 5.1.1(i)](https://developer.apple.com/app-store/review/guidelines/).
 - [ ] Confirm GitHub Issues is an acceptable support route for the intended territories/review and supply any additional actual contact information required by the [Support URL field](https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information). Warn against posting personal health information publicly.
 - [ ] Verify Open Food Facts' handling of barcode requests, source IPs, logs, retention, purpose, and linkage. Its privacy page was bot-blocked during preparation; no retention guarantee has been established.
+- [ ] Resolve the provider's current [API integration requirements](https://openfoodfacts.github.io/openfoodfacts-server/api/): actual owner contact for the User-Agent, usage registration, and a reviewed migration from the still-supported but deprecated v2 product endpoint. The present agent links to the public repository; it does not invent a contact email. Do not treat a successful product lookup as approval of the integration or privacy declaration.
 - [ ] Complete App Privacy using [Apple's definitions](https://developer.apple.com/app-store/app-privacy-details/) and the [code evidence](metadata.md#app-privacy-preparation--declaration-remains-open). Do not choose Data Not Collected just because the diary is local. Reconcile any retained provider/support data with the manifest and policy.
 - [ ] Verify health-data storage protections on a physical iPhone. The dedicated storage folder now excludes diary/profile and migration recovery records from backups; iOS writes use complete file protection. Legacy UserDefaults values move to a verified recovery file before removal, including on already-migrated installations. Test lock/unlock, migration, and a device backup against [Guideline 5.1.3(ii)](https://developer.apple.com/app-store/review/guidelines/) and [Apple's backup guidance](https://developer.apple.com/documentation/foundation/optimizing-your-app-s-data-for-icloud-backup). Existing external backup copies remain outside the app's control.
 - [ ] Verify deletion instructions: removing an entry retains its saved food and legacy migration records; Delete App removes the current app container, while Offload App keeps data. Backups and third-party support records are separate. The app creates no HealthKit records.
@@ -89,5 +90,12 @@ Recheck linked requirements at the actual submission date.
 
 - [x] Add a shared-scheme XCTest UI target and a simulator runner, with UUID-isolated real storage enabled only in Debug builds.
 - [x] Cover fresh onboarding, quick logging, delete/Undo, portion-preview replacement, edited-entry Undo, calorie-only foods, fractional manual targets, valid/invalid macro splits, reset/cancel, and relaunch persistence.
-- [ ] Verify the new UI suite actually passes on CI; implementation and compilation alone do not prove these journeys work.
+- [x] In [run 34178369288](https://github.com/bond-is-here/nibble/actions/runs/34178369288), three iPhone journeys passed: calorie-only foods/relaunch, live portion previews/edit/Undo, and quick logging/delete/Undo/relaunch.
+- [ ] Verify the complete UI suite after fixing its text-replacement helper: the first run inserted `30` before the existing `25` in the macro field. The manual-target/custom-split journey did not complete, so its remaining assertions are still unverified.
 - [ ] Inspect the resulting iPhone screenshots, then test additional supported screen sizes and accessibility settings. Complete physical camera, signing, account, and privacy gates above before release.
+
+## Barcode network privacy
+
+- [x] Replace the shared networking session with an ephemeral session, no HTTP cache, no cookie handling, and no credential store. Logged and favorited products still persist through the protected diary archive.
+- [x] All 1,116 local checks passed, including nine new request/configuration assertions. These verify client behavior, not provider-side retention.
+- [ ] Verify this change's iOS CI and complete the provider/contact/privacy checks above.
