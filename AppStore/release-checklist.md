@@ -4,12 +4,12 @@ Last audited September 8, 2026. This is release-readiness documentation, not a c
 
 ## Current release status — audited, still gated
 
-Nibble is being reviewed on branch `codex/compact-ui-followup`. Main-branch PR4 is merged; [PR5 is open](https://github.com/bond-is-here/nibble/pull/5). This release pass includes canonical GTIN identity matching, legacy favorite compatibility, delayed barcode-flow coverage, accessibility contrast, and compact-screen UI navigation.
+The release candidate is on `main` after [PR5 was merged](https://github.com/bond-is-here/nibble/pull/5). This release pass includes canonical GTIN identity matching, legacy favorite compatibility, delayed barcode-flow coverage, accessibility contrast, compact-screen UI navigation, and legacy display-unit migration.
 
 | Area | Current evidence | Status |
 | --- | --- | --- |
-| Local checks | `Tools/check.sh` passed 1,157 checks: 618 diary, 162 barcode, 331 macro, 28 storage, 12 palette, and 6 reporter. | Verified locally; not a release approval. |
-| Verified iPhone UI matrix | The [PR5 Checks page](https://github.com/bond-is-here/nibble/pull/5/checks) is the authoritative source: standard and compact jobs must both complete successfully, including shared checks, Debug/Release builds, and the full UI-journey step. UI result artifacts are retained for both sizes. | Verify the current commit in CI; artifacts are not a substitute for physical-device or signed-release QA. |
+| Local checks | `Tools/check.sh` passed 1,160 checks: 621 diary, 162 barcode, 331 macro, 28 storage, 12 palette, and 6 reporter. | Verified locally; not a release approval. |
+| Verified iPhone UI matrix | The merged [PR5 Checks page](https://github.com/bond-is-here/nibble/pull/5/checks) records standard and compact jobs completing successfully, including shared checks, Debug/Release builds, and the full UI-journey step. UI result artifacts are retained for both sizes. | Verify the current commit in CI; artifacts are not a substitute for physical-device or signed-release QA. |
 | Historical UI evidence | Earlier runs `34181081328`, `34182565224`, and `34183944655` remain linked below for context. | Superseded by the all-green PR5 run. |
 | Access and toolchain | Browser artifact review is available. Local full Xcode still requires the owner’s license/first launch. | Open. |
 | Distribution | Apple account/team, signing access, membership, identifier continuity, seller/copyright identity, and App Review contact are unknown. No upload, payment, or agreement acceptance has occurred. | Open. |
@@ -39,7 +39,7 @@ The latest local checks validate implementation behavior, including the local st
 
 ## 3. Privacy, support, storage, and provider gates
 
-- [ ] After PR5 is merged, verify the public [privacy policy](https://github.com/bond-is-here/nibble/blob/main/PRIVACY.md), [support page](https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md), and [Issues contact](https://github.com/bond-is-here/nibble/issues) load without authentication.
+- [ ] Verify the public [privacy policy](https://github.com/bond-is-here/nibble/blob/main/PRIVACY.md), [support page](https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md), and [Issues contact](https://github.com/bond-is-here/nibble/issues) load without authentication.
 - [ ] Verify the in-app Privacy policy and Help & support links under You on the signed release candidate. Keep public policy, in-app disclosure, store metadata, and the shipped behavior aligned.
 - [ ] Resolve the Support URL requirement for the chosen territories. GitHub Issues is the planned public support route, but the current page intentionally publishes no private email or legal address; confirm whether actual legal address, email, and telephone details must be exposed and provide real details if required. Never invent contact information.
 - [ ] Verify Open Food Facts’ production handling of barcode requests, source IPs, logs, retention, purpose, and linkage. Nibble’s ephemeral session and no-local-HTTP-history behavior do not prove provider-side deletion or non-retention.
@@ -72,4 +72,4 @@ The latest local checks validate implementation behavior, including the local st
 - `febc521` / [run 34181081328](https://github.com/bond-is-here/nibble/actions/runs/34181081328) is the latest locally verified seven-journey baseline described above, including inspected iPhone screenshots.
 - `440c7ec` / [run 34182565224](https://github.com/bond-is-here/nibble/actions/runs/34182565224) is retained as qualified build/UI evidence: standard-device success, compact UI failure with public exit 65, and no established root cause. The exact eight-test summaries and screenshots were not downloaded.
 
-Earlier notes cited 1,079, 1,116, 1,128, or 1,134 local checks as features landed. Those are historical snapshots; the current aggregate is 1,157 with the breakdown in the status table. Recheck all linked platform and provider requirements at the actual submission date.
+Earlier notes cited 1,079, 1,116, 1,128, 1,134, or 1,157 local checks as features landed. Those are historical snapshots; the current aggregate is 1,160 with the breakdown in the status table. Recheck all linked platform and provider requirements at the actual submission date.
