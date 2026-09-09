@@ -173,6 +173,7 @@ final class AppState: ObservableObject {
     /// The user explicitly chooses where the resulting file goes in the system
     /// Files/share flow; Nibble never uploads this data automatically.
     func exportData() throws -> Data {
+        guard writable else { throw CocoaError(.fileReadCorruptFile) }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         return try encoder.encode(archive)

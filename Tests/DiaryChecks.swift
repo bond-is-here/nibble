@@ -684,6 +684,7 @@ struct DiaryChecks {
             try expect(state.archive == DiaryArchive() && state.toast == nil && !state.canUndo,
                        "Blocked corrupt-file writes must not report success or mutate state")
             try expect(state.storageError == error, "Preserve the actionable read error")
+            try expect((try? state.exportData()) == nil, "Unreadable archive must not export an empty replacement")
             try expect(fixture.state().storageError != nil, "Relaunch still detects the preserved file")
         }
     }

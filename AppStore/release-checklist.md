@@ -4,11 +4,11 @@ Last audited September 8, 2026. This is release-readiness documentation, not a c
 
 ## Current release status — audited, still gated
 
-The release candidate is on `main` after [PR6 was merged](https://github.com/bond-is-here/nibble/pull/6). This release pass includes canonical GTIN identity matching, legacy favorite compatibility, delayed barcode-flow coverage, accessibility contrast, compact-screen UI navigation, legacy display-unit migration, and portable diary export preparation.
+The release candidate is on `main` after [PR6 was merged](https://github.com/bond-is-here/nibble/pull/6). This release pass includes canonical GTIN identity matching, legacy favorite compatibility, delayed barcode-flow coverage, accessibility contrast, compact-screen UI navigation, legacy display-unit migration, portable diary export preparation, and corrupt-archive export protection.
 
 | Area | Current evidence | Status |
 | --- | --- | --- |
-| Local checks | `Tools/check.sh` passed 1,168 checks: 629 diary, 162 barcode, 331 macro, 28 storage, 12 palette, and 6 reporter. | Verified locally; not a release approval. |
+| Local checks | `Tools/check.sh` passed 1,175 checks: 636 diary, 162 barcode, 331 macro, 28 storage, 12 palette, and 6 reporter. | Verified locally; not a release approval. |
 | Verified iPhone UI matrix | The merged [PR5 Checks page](https://github.com/bond-is-here/nibble/pull/5/checks) records standard and compact jobs completing successfully, including shared checks, Debug/Release builds, and the full UI-journey step. UI result artifacts are retained for both sizes. | Verify the current commit in CI; artifacts are not a substitute for physical-device or signed-release QA. |
 | Historical UI evidence | Earlier runs `34181081328`, `34182565224`, and `34183944655` remain linked below for context. | Superseded by the all-green PR5 run. |
 | Access and toolchain | Browser artifact review is available. Local full Xcode still requires the owner’s license/first launch. | Open. |
@@ -73,4 +73,4 @@ The latest local checks validate implementation behavior, including the local st
 - `febc521` / [run 34181081328](https://github.com/bond-is-here/nibble/actions/runs/34181081328) is the latest locally verified seven-journey baseline described above, including inspected iPhone screenshots.
 - `440c7ec` / [run 34182565224](https://github.com/bond-is-here/nibble/actions/runs/34182565224) is retained as qualified build/UI evidence: standard-device success, compact UI failure with public exit 65, and no established root cause. The exact eight-test summaries and screenshots were not downloaded.
 
-Earlier notes cited 1,079, 1,116, 1,128, 1,134, 1,157, or 1,160 local checks as features landed. Those are historical snapshots; the current aggregate is 1,168 with the breakdown in the status table. Recheck all linked platform and provider requirements at the actual submission date.
+Earlier notes cited 1,079, 1,116, 1,128, 1,134, 1,157, 1,160, or 1,168 local checks as features landed. Those are historical snapshots; the current aggregate is 1,175 with the breakdown in the status table. Recheck all linked platform and provider requirements at the actual submission date.
