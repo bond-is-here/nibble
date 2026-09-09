@@ -116,7 +116,7 @@ struct DashboardView: View {
                         .accessibilityIdentifier("diary.calories")
                         .nibbleFont(size: 62, weight: .medium, design: .rounded).tracking(-4)
                         .lineLimit(1).minimumScaleFactor(0.7).contentTransition(.numericText())
-                    Text("calories enjoyed").nibbleFont(size: 13, weight: .medium).foregroundStyle(Color.ink.opacity(0.7))
+                    Text("calories enjoyed").nibbleFont(size: 13, weight: .medium).foregroundStyle(Color.ink)
                 }
                 Spacer(minLength: 8)
                 if !typeSize.isAccessibilitySize { NibbleMascot(color: .white.opacity(0.8), cheerful: !appState.selectedEntries.isEmpty)
@@ -138,7 +138,7 @@ struct DashboardView: View {
                         Text(abs(target - totals.calories).whole).nibbleFont(size: 16, weight: .bold, design: .rounded)
                         Text(totals.calories <= target ? "left today" : "above target").nibbleFont(size: 12)
                     }
-                    Text("\(target.whole) goal").nibbleFont(size: 12).foregroundStyle(Color.ink.opacity(0.65))
+                    Text("\(target.whole) goal").nibbleFont(size: 12).foregroundStyle(Color.ink)
                 }
             } else {
                 Text("Just noticing. No target needed.").nibbleFont(size: 13, weight: .medium)

@@ -36,7 +36,7 @@ struct ProfileView: View {
                     } else {
                         Text("Curiosity counts.").nibbleFont(size: 27, weight: .semibold, design: .rounded)
                         Text("Track what you eat without aiming for a number. Add a target whenever it helps.")
-                            .nibbleFont(size: 14).foregroundStyle(Color.ink.opacity(0.7))
+                            .nibbleFont(size: 14).foregroundStyle(Color.ink)
                     }
                     NibbleButton(title: "Tune my plan", icon: "slider.horizontal.3") { showEdit = true }
                     Button { showMacroEditor = true } label: {
@@ -94,7 +94,7 @@ struct ProfileView: View {
     private func planMacro(_ title: String, value: Double) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text("\(value.whole) g").nibbleFont(size: 17, weight: .semibold, design: .rounded)
-            Text(title).nibbleFont(size: 11).foregroundStyle(Color.ink.opacity(0.65))
+            Text(title).nibbleFont(size: 11).foregroundStyle(Color.ink)
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
 
