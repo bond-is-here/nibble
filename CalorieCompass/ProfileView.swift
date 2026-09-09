@@ -76,10 +76,12 @@ struct ProfileView: View {
                     Button(action: prepareExport) {
                         Label("Export a diary copy", systemImage: "square.and.arrow.up")
                             .nibbleFont(size: 13, weight: .semibold)
+                            .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("diary.export")
+                    .accessibilityHint("Save or share a JSON copy of your local diary")
                     Text("Save or share a readable JSON copy using the system Files sheet. Nibble does not send it anywhere unless you choose a destination.")
                         .nibbleFont(size: 11).foregroundStyle(Color.muted).lineSpacing(3)
                     if let exportError {
