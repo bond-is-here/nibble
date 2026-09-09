@@ -278,6 +278,8 @@ final class AppState: ObservableObject {
             try? await Task.sleep(nanoseconds: 6_000_000_000)
             guard !Task.isCancelled else { return }
             self?.toast = nil
+            self?.canUndo = false
+            self?.undoAction = nil
         }
     }
 
