@@ -44,6 +44,11 @@ struct AddFoodView: View {
             }
         }
         .background(Color.canvas)
+        // Add Food is a task-like flow with an explicit close button. Disable
+        // the sheet's swipe-to-dismiss gesture for the whole flow so scrolling
+        // a long form can never discard an in-progress label, portion edit, or
+        // barcode lookup result.
+        .interactiveDismissDisabled(true)
         .sheet(isPresented: $showScanner) {
             ZStack(alignment: .topTrailing) {
                 BarcodeScannerView { code in

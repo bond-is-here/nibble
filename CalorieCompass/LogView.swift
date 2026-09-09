@@ -34,7 +34,7 @@ struct LogView: View {
                         NibbleMascot(color: .white.opacity(0.7), cheerful: true).frame(width: 101, height: 101).rotationEffect(.degrees(12))
                     }
                     Text("No streak to lose. Every entry is a little more awareness.")
-                        .nibbleFont(size: 13).foregroundStyle(Color.ink.opacity(0.7))
+                        .nibbleFont(size: 13).foregroundStyle(Color.ink)
                 }.cardSurface(.lilac)
                 VStack(alignment: .leading, spacing: 20) {
                     SectionHeading(title: "Your week in bites")

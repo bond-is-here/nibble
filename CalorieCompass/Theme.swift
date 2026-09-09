@@ -210,7 +210,7 @@ struct MacroTile: View {
                     Capsule().fill(Color.ink.opacity(0.09))
                     Capsule().fill(Color.ink.opacity(0.65)).frame(width: g.size.width * min(value / max(target, 1), 1))
                 }.frame(height: 3)
-                Text("of \(target.whole) g").font(.system(size: 9)).foregroundStyle(Color.ink.opacity(0.65))
+                Text("of \(target.whole) g").font(.system(size: 9)).foregroundStyle(Color.ink)
             }
         }.frame(maxWidth: .infinity, alignment: .leading).padding(14)
             .background(color, in: RoundedRectangle(cornerRadius: 21))

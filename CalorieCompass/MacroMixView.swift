@@ -158,7 +158,7 @@ struct MacroMixView: View {
         VStack(alignment: .leading, spacing: 15) {
             Eyebrow(text: "Next little bite", color: .ink)
             Text(insight.nudge.title).nibbleFont(size: 23, weight: .semibold, design: .rounded).tracking(-0.5)
-            Text(insight.nudge.detail).nibbleFont(size: 13).foregroundStyle(Color.ink.opacity(0.75)).lineSpacing(3)
+            Text(insight.nudge.detail).nibbleFont(size: 13).foregroundStyle(Color.ink).lineSpacing(3)
             ForEach(insight.suggestions) { suggestion in
                 Button { selectedFood = suggestion.food } label: {
                     HStack(spacing: 11) {
@@ -167,7 +167,7 @@ struct MacroMixView: View {
                             Text(suggestion.food.name).nibbleFont(size: 14, weight: .semibold)
                             Text("+\(suggestion.focus.grams(in: suggestion.food).compact) g \(suggestion.focus.title.lowercased()) · \(suggestion.food.calories.whole) cal")
                                 .nibbleFont(size: 11)
-                            Text(suggestion.food.servingText).nibbleFont(size: 10).foregroundStyle(Color.muted)
+                            Text(suggestion.food.servingText).nibbleFont(size: 10).foregroundStyle(Color.ink)
                         }
                         Spacer(minLength: 0)
                         Image(systemName: "arrow.up.right").nibbleFont(size: 12, weight: .semibold)
@@ -175,7 +175,7 @@ struct MacroMixView: View {
                 }.buttonStyle(.plain).accessibilityHint("Review portion and meal before logging")
             }
             if !insight.suggestions.isEmpty {
-                Text("An idea, not an instruction. Check ingredients and choose your portion.").nibbleFont(size: 10).foregroundStyle(Color.muted)
+                Text("An idea, not an instruction. Check ingredients and choose your portion.").nibbleFont(size: 10).foregroundStyle(Color.ink)
             }
         }.cardSurface(.lilac)
     }

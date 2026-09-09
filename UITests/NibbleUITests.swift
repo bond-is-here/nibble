@@ -336,6 +336,22 @@ final class NibbleUITests: XCTestCase {
             }
             field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: text.count) + value)
         }
+        // Compact simulators can deliver the final key event a beat after
+        // typeText returns. If the field contains a partial prefix, append the
+        // missing suffix; otherwise retry the full replacement from a fresh
+        // caret position before reporting a real failure.
+        for _ in 0..<2 {
+            let typed = field.value as? String ?? ""
+            if typed == value { break }
+            field.tap()
+            if value.hasPrefix(typed) {
+                field.typeText(String(value.dropFirst(typed.count)))
+            } else {
+                field.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+                field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: typed.count) + value)
+            }
+            _ = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", value), object: field)], timeout: 1)
+        }
         XCTAssertEqual(field.value as? String, value, file: file, line: line)
     }
 
@@ -347,28 +363,52 @@ final class NibbleUITests: XCTestCase {
 
     private func reveal(_ element: XCUIElement, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         if !element.exists { _ = element.waitForExistence(timeout: 3) }
-        // SwiftUI can leave an element in the accessibility tree while it is
-        // far outside the viewport. Always swiping in one direction made the
-        // compact device tests overshoot targets above the current position.
-        // Use the element's frame to choose the direction on every pass.
-        for _ in 0..<16 {
-            if element.exists && element.isHittable { return }
-            let scroll = app.scrollViews.firstMatch
-            guard scroll.exists else { break }
-            let viewport = scroll.frame.isEmpty ? app.windows.firstMatch.frame : scroll.frame
-            let top = viewport.minY + 12
-            let bottom = viewport.maxY - 12
-            let frame = element.frame
-            if frame.maxY < top {
-                scroll.swipeDown()
-            } else if frame.minY > bottom {
-                scroll.swipeUp()
-            } else if towardTop {
-                scroll.swipeDown()
-            } else {
-                scroll.swipeUp()
+        if element.exists && element.isHittable { return }
+
+        // Sheets can leave the underlying tab's ScrollView in the hierarchy.
+        // Drive the deepest scroll view that contains the target's actual
+        // element type and accessibility identity. XCTest does not expose a
+        // parent pointer for XCUIElement, and SwiftUI can reuse labels such as
+        // "0" across unrelated text and text fields.
+        let scrollViews = app.scrollViews.allElementsBoundByIndex
+        let scroll = scrollViews.reversed().first { candidate in
+            candidate.descendants(matching: element.elementType).allElementsBoundByIndex.contains { descendant in
+                if !element.identifier.isEmpty { return descendant.identifier == element.identifier }
+                return descendant.label == element.label
             }
         }
+            // If SwiftUI merges the target into an ancestor, prefer the
+            // frontmost full-height scroll view. A sheet can sit above the
+            // dashboard, so the first scroll view may belong to the hidden
+            // tab and send gestures to the wrong surface.
+            ?? scrollViews.reversed().first { candidate in
+                let frame = candidate.frame
+                return !frame.isEmpty && frame.height >= 200
+            }
+            ?? app.scrollViews.firstMatch
+        guard scroll.exists else {
+            XCTAssertTrue(false, "Control is not reachable: no scroll view for \(element)", file: file, line: line)
+            return
+        }
+
+        // Re-evaluate after every short drag. SwiftUI can report a stale frame
+        // while a sheet or compact ScrollView is settling, so a one-shot
+        // direction can pull the sheet away from the control. Keep gestures in
+        // the middle of the viewport to avoid starting a sheet dismissal.
+        for _ in 0..<20 {
+            if element.exists && element.isHittable { return }
+            let targetFrame = element.frame
+            let viewport = scroll.frame.isEmpty ? app.windows.firstMatch.frame : scroll.frame
+            let targetIsAbove = !targetFrame.isEmpty && targetFrame.maxY <= viewport.minY + 4
+            let targetIsBelow = !targetFrame.isEmpty && targetFrame.minY >= viewport.maxY - 4
+            let moveTowardTop = targetIsAbove || (!targetIsBelow && towardTop)
+            let startY: CGFloat = moveTowardTop ? 0.40 : 0.60
+            let endY: CGFloat = moveTowardTop ? 0.60 : 0.40
+            let start = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: startY))
+            let end = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: endY))
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
+
         XCTAssertTrue(element.exists && element.isHittable, "Control is not reachable: \(element)\n\(app.debugDescription)", file: file, line: line)
     }
 }

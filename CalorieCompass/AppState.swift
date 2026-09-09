@@ -40,7 +40,12 @@ final class AppState: ObservableObject {
                     return bytes
                 }
                 if let data = try data("calorieCompass.profile") {
-                    imported.profile = try JSONDecoder().decode(UserProfile.self, from: data)
+                    let profile = try JSONDecoder().decode(UserProfile.self, from: data)
+                    imported.profile = profile
+                    // The first archive format stored the display preference on
+                    // the profile. Preserve it when moving that diary to the
+                    // archive-level preference used by the current UI.
+                    imported.units = profile.displayUnits ?? imported.units
                     imported.hasStarted = true
                 }
                 if let data = try data("calorieCompass.entries") {

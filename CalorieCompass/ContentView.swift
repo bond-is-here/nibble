@@ -47,7 +47,14 @@ struct MainTabView: View {
         }
         .background(Color.canvas.ignoresSafeArea())
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: appState.toast)
+        // Add Food is a multi-step task with long, editable forms. On iPhone, a
+        // full-screen cover prevents a downward scroll at the top of a compact
+        // device from being interpreted as sheet dismissal and losing the draft.
+        #if os(iOS)
+        .fullScreenCover(item: $addRequest) { request in AddFoodView(initialMeal: request.meal, startWithScan: request.scan) }
+        #else
         .sheet(item: $addRequest) { request in AddFoodView(initialMeal: request.meal, startWithScan: request.scan).phoneSheet() }
+        #endif
     }
 
     @ViewBuilder private var toastView: some View {

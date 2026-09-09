@@ -84,6 +84,13 @@ struct BarcodeLookupChecks {
                    "Decode JSON numbers and numeric strings")
         try expect(mixed.servingText == "per 100 g", "Label explicitly known mass basis")
 
+        let currentAPI = try OpenFoodFactsClient.mapProduct(data: Data(#"{"status":"success_with_warnings","code":"3017620422003","product":{"product_name":"Current API snack","product_quantity_unit":"g","nutriments":{"energy-kcal_100g":200,"proteins_100g":5,"carbohydrates_100g":20,"fat_100g":8}}}"#.utf8), barcode: barcode)
+        try expect(currentAPI.name == "Current API snack" && currentAPI.calories == 200,
+                   "Decode the current Open Food Facts API status and product envelope")
+        try expectError(.notFound) {
+            _ = try OpenFoodFactsClient.mapProduct(data: Data(#"{"status":"failure","result":{"id":"product_not_found"}}"#.utf8), barcode: barcode)
+        }
+
         for key in ["energy-kj_100g", "energy_100g"] {
             let converted = try map("""
             {"product_name":"Juice","nutriments":{"energy-kcal_100g":"unknown","\(key)":"418.4","energy_unit":"kcal",
@@ -188,13 +195,13 @@ struct BarcodeLookupChecks {
         let session = URLSession(configuration: configuration)
         defer { session.invalidateAndCancel() }
         let client = OpenFoodFactsClient(session: session)
-        let success = Data(#"{"status":1,"product":{"product_name":"Test","nutriments":{"energy-kcal_100g":0,"proteins_100g":0,"carbohydrates_100g":0,"fat_100g":0}}}"#.utf8)
+        let success = Data(#"{"status":"success","code":"3017620422003","product":{"product_name":"Test","product_quantity_unit":"g","nutriments":{"energy-kcal_100g":0,"proteins_100g":0,"carbohydrates_100g":0,"fat_100g":0}}}"#.utf8)
         FixtureURLProtocol.configure(.http(200, success))
         let food = try await client.lookup(barcode: barcode)
         try expect(food.calories == 0, "Injected session success")
         let request = FixtureURLProtocol.lastRequest
         try expect(request?.url?.host == "world.openfoodfacts.org"
-                   && request?.url?.path == "/api/v2/product/\(barcode).json", "Build the expected product URL")
+                   && request?.url?.path == "/api/v3/product/\(barcode)", "Build the current product URL")
         try expect(request?.value(forHTTPHeaderField: "User-Agent")?.hasPrefix("Nibble/") == true,
                    "Identify the app to Open Food Facts")
         try expect(request?.value(forHTTPHeaderField: "Accept") == "application/json", "Request JSON")
@@ -208,6 +215,9 @@ struct BarcodeLookupChecks {
             .queryItems?.first(where: { $0.name == "fields" })?.value
         try expect(fields?.contains("nutriments") == true && fields?.contains("product_quantity_unit") == true,
                    "Request nutrition and unit fields")
+        let productType = request?.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) }?
+            .queryItems?.first(where: { $0.name == "product_type" })?.value
+        try expect(productType == "food", "Limit lookups to food products")
 
         for (status, expected) in [(404, FoodLookupError.notFound), (429, .rateLimited),
                                    (503, .httpError(statusCode: 503)), (403, .httpError(statusCode: 403))] {
