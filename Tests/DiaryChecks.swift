@@ -48,6 +48,7 @@ struct DiaryChecks {
             }
         }
         run("old UserDefaults migration and protected recovery records", migrationChecks)
+        run("legacy display units survive migration", legacyDisplayUnitMigrationChecks)
         run("saved-food-only legacy data is persisted", savedFoodsOnlyMigrationChecks)
         run("failed migration write does not expose an unsaved diary", failedMigrationWriteChecks)
         run("corrupt legacy import does not expose partial data", corruptMigrationChecks)
@@ -745,6 +746,18 @@ struct DiaryChecks {
             try expect(reloaded.entries.isEmpty && reloaded.archive.calorieTarget == 1_900,
                        "Existing JSON must take precedence over retained legacy keys; do not resurrect deleted entries")
             try expectLegacyRetained(payloads, fixture)
+        }
+    }
+
+    private static func legacyDisplayUnitMigrationChecks() throws {
+        try withFixture { fixture in
+            var payloads = legacyPayloads()
+            payloads[legacyProfileKey] = try JSONEncoder().encode(profile())
+            seedLegacy(payloads, fixture)
+            let state = fixture.state()
+            try expect(state.profile?.displayUnits == .metric, "Metric legacy profile remains decodable")
+            try expect(state.archive.units == .metric, "Legacy profile units become the current archive preference")
+            try expect(fixture.state().archive.units == .metric, "Migrated display units survive relaunch")
         }
     }
 
