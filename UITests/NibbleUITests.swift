@@ -67,6 +67,7 @@ final class NibbleUITests: XCTestCase {
 
     func testManualTargetAndCustomMacroMixSurviveRelaunch() {
         tap(app.buttons["You"])
+        XCTAssertTrue(app.buttons["Export a diary copy"].exists, "Profile must expose a portable diary export")
         tap(app.buttons["Tune my plan"])
         tap(app.buttons["Set my own"])
         replace(app.textFields["Daily calorie target"], with: "2000.5")
@@ -312,9 +313,17 @@ final class NibbleUITests: XCTestCase {
 
     private func expectLabel(_ element: XCUIElement, _ value: String, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         reveal(element, towardTop: towardTop, file: file, line: line)
-        let expected = NSPredicate(format: "label == %@", value)
-        let result = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: expected, object: element)], timeout: 5)
-        XCTAssertEqual(result, .completed, "Expected \(value), found \(element.label)", file: file, line: line)
+        // SwiftUI may replace a dynamic Text node while a portion preview is
+        // recalculated. XCTest's predicate can keep observing the old node,
+        // even though the live accessibility label already has the expected
+        // value (especially on the compact simulator). Poll the live element
+        // instead of treating that stale-node race as a product failure.
+        let deadline = Date().addingTimeInterval(5)
+        while Date() < deadline {
+            if element.label == value { return }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+        XCTAssertEqual(element.label, value, "Expected \(value), found \(element.label)", file: file, line: line)
     }
 
     private func replace(_ field: XCUIElement, with value: String, towardTop: Bool = false, file: StaticString = #filePath, line: UInt = #line) {

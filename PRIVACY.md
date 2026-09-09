@@ -1,6 +1,6 @@
 # Nibble privacy policy
 
-Last updated: September 7, 2026
+Last updated: September 8, 2026
 
 This policy describes the Nibble iPhone app in this repository, including its migration from Calorie Compass. Nibble is a food diary with optional calorie and macro targets. It does not require a Nibble account.
 
@@ -21,6 +21,8 @@ Nibble marks its dedicated storage folder, including the diary and migration rec
 Nibble does not read from or write to Apple Health or HealthKit. Its locally saved nutrition and body information is app data; it is not an Apple Health database.
 
 Macro Mix, food-library suggestions, portion previews, and weekly macro summaries are calculated on the device. No AI service receives your data, and these calculations do not make network requests. A suggested food is not logged until you choose its portion and save it.
+
+If you choose **Export a diary copy** in You, Nibble prepares a JSON snapshot of the current local archive and gives it to Apple’s system Files/share flow. The app does not upload, sync, or send that copy to a destination unless you select one in the system sheet. Any service or person you choose receives the exported contents under that destination’s own practices; exported copies are outside Nibble’s control.
 
 ## Barcode lookups and camera access
 
@@ -45,6 +47,8 @@ If you choose to contact the maintainers through [Nibble GitHub Issues](https://
 Nibble keeps local records until you change or remove them. There is no automatic expiration of the diary or saved foods.
 
 To remove an individual diary entry, open its date in Diary, open the entry's three-dot menu, and choose Delete. The change is saved locally; Undo can restore it. The last changed entry may also remain in memory for Undo during that app session. Deleting a diary entry does not delete the food from the saved library or clear the retained Calorie Compass migration records. Removing a favorite removes the star, not the saved food.
+
+To make a portable copy, open You > Export a diary copy and choose a destination in the system Files/share sheet. Exporting does not remove local data or create an automatic backup. Delete any exported copies separately wherever you saved or shared them.
 
 To delete all Nibble data stored in the current iPhone app container, including your locally saved nutrition/body information, saved foods, preferences, and retained migration records:
 

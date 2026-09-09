@@ -86,6 +86,8 @@ No purchase, enrollment, signed upload, or App Store submission has been perform
 
 `AppState` saves a versioned JSON archive under Application Support/Nibble using atomic writes. In-memory state changes only after saving succeeds. The dedicated folder is excluded from device backups before writes, and iOS files use complete file protection. Earlier Calorie Compass values are copied and verified in a protected `legacy-recovery.plist` before removing the three legacy defaults keys. Interrupted migration can resume from that copy; a current diary always wins. Unreadable originals are preserved and surfaced as a storage error. Earlier external backup copies remain outside the app's control.
 
+Profile includes an explicit **Export a diary copy** action. It prepares a readable JSON snapshot and hands it to the system Files/share flow; Nibble does not upload or sync the export unless the person chooses a destination. The export is a portable copy, not an automatic backup or an import/restore mechanism.
+
 No account, analytics, or cloud sync is included. Barcode lookup sends the barcode to Open Food Facts; the diary and body profile are not uploaded. The app includes a privacy manifest for its own UserDefaults access.
 
 Barcode networking uses an ephemeral session without cookies, credentials, or an HTTP cache. Only products you log or favorite are retained in the protected archive; provider-side request handling remains a separate release/privacy verification gate.
