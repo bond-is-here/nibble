@@ -8,8 +8,8 @@ Nibble is being reviewed on branch `codex/compact-ui-followup`. Main-branch PR4 
 
 | Area | Current evidence | Status |
 | --- | --- | --- |
-| Local checks | `Tools/check.sh` passed 1,154 checks: 618 diary, 159 barcode, 331 macro, 28 storage, 12 palette, and 6 reporter. | Verified locally; not a release approval. |
-| Verified iPhone UI matrix | `1c6740c`, [run 34273326952](https://github.com/bond-is-here/nibble/actions/runs/34273326952): standard and compact jobs both completed successfully, including shared checks, Debug/Release builds, and the full UI-journey step. UI result artifacts were retained for both sizes. | Verified CI evidence; artifacts are not a substitute for physical-device or signed-release QA. |
+| Local checks | `Tools/check.sh` passed 1,157 checks: 618 diary, 162 barcode, 331 macro, 28 storage, 12 palette, and 6 reporter. | Verified locally; not a release approval. |
+| Verified iPhone UI matrix | The [PR5 Checks page](https://github.com/bond-is-here/nibble/pull/5/checks) is the authoritative source: standard and compact jobs must both complete successfully, including shared checks, Debug/Release builds, and the full UI-journey step. UI result artifacts are retained for both sizes. | Verify the current commit in CI; artifacts are not a substitute for physical-device or signed-release QA. |
 | Historical UI evidence | Earlier runs `34181081328`, `34182565224`, and `34183944655` remain linked below for context. | Superseded by the all-green PR5 run. |
 | Access and toolchain | Browser artifact review is available. Local full Xcode still requires the owner’s license/first launch. | Open. |
 | Distribution | Apple account/team, signing access, membership, identifier continuity, seller/copyright identity, and App Review contact are unknown. No upload, payment, or agreement acceptance has occurred. | Open. |
@@ -72,4 +72,4 @@ The latest local checks validate implementation behavior, including the local st
 - `febc521` / [run 34181081328](https://github.com/bond-is-here/nibble/actions/runs/34181081328) is the latest locally verified seven-journey baseline described above, including inspected iPhone screenshots.
 - `440c7ec` / [run 34182565224](https://github.com/bond-is-here/nibble/actions/runs/34182565224) is retained as qualified build/UI evidence: standard-device success, compact UI failure with public exit 65, and no established root cause. The exact eight-test summaries and screenshots were not downloaded.
 
-Earlier notes cited 1,079, 1,116, 1,128, or 1,134 local checks as features landed. Those are historical snapshots; the current aggregate is 1,154 with the breakdown in the status table. Recheck all linked platform and provider requirements at the actual submission date.
+Earlier notes cited 1,079, 1,116, 1,128, or 1,134 local checks as features landed. Those are historical snapshots; the current aggregate is 1,157 with the breakdown in the status table. Recheck all linked platform and provider requirements at the actual submission date.
