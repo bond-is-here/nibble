@@ -168,6 +168,16 @@ final class AppState: ObservableObject {
         var keys = Set<String>()
         return (favoriteFoods + recentFoods + Self.foodDatabase).filter { keys.insert($0.stableKey).inserted }.prefix(8).map { $0 }
     }
+
+    /// Creates a portable snapshot without writing it back into the app container.
+    /// The user explicitly chooses where the resulting file goes in the system
+    /// Files/share flow; Nibble never uploads this data automatically.
+    func exportData() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(archive)
+    }
+
     func entries(on date: Date) -> [FoodLogEntry] {
         archive.entries.filter { Calendar.current.isDate($0.date, inSameDayAs: date) }.sorted { $0.date > $1.date }
     }

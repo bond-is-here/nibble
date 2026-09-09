@@ -67,6 +67,7 @@ final class NibbleUITests: XCTestCase {
 
     func testManualTargetAndCustomMacroMixSurviveRelaunch() {
         tap(app.buttons["You"])
+        XCTAssertTrue(app.buttons["Export a diary copy"].exists, "Profile must expose a portable diary export")
         tap(app.buttons["Tune my plan"])
         tap(app.buttons["Set my own"])
         replace(app.textFields["Daily calorie target"], with: "2000.5")

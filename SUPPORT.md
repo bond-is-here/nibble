@@ -1,6 +1,6 @@
 # Nibble support
 
-Last updated: September 7, 2026
+Last updated: September 8, 2026
 
 For app problems, questions, or feature requests, use [Nibble GitHub Issues](https://github.com/bond-is-here/nibble/issues). Search existing issues first, then open a new issue if needed. Posting requires a GitHub account; using Nibble does not.
 
@@ -47,7 +47,7 @@ Targets are estimates, not prescriptions or guaranteed weight outcomes. The auto
 
 ## Storage errors and starting over
 
-If a change cannot be saved, check available iPhone storage and retry. If an existing diary cannot be opened or an earlier Calorie Compass diary cannot be imported, Nibble preserves the original data and displays an error. Reopen after addressing storage problems; report a persistent error using its wording and sample reproduction steps, without attaching your diary. Do not delete the app as a troubleshooting step if you need to keep that local diary. There is no in-app export or developer cloud recovery service.
+If a change cannot be saved, check available iPhone storage and retry. If an existing diary cannot be opened or an earlier Calorie Compass diary cannot be imported, Nibble preserves the original data and displays an error. Reopen after addressing storage problems; report a persistent error using its wording and sample reproduction steps, without attaching your diary. Do not delete the app as a troubleshooting step if you need to keep that local diary. You can make a portable copy from You > Export a diary copy; Nibble has no developer cloud recovery service.
 
 To intentionally erase all local Nibble information, open Settings > General > iPhone Storage > Nibble > Delete App and confirm. This removes the app container, including locally saved health/body information and original migration records. Offloading keeps the data. Backups and publicly posted support requests are separate: follow the [privacy policy's retention and deletion instructions](PRIVACY.md#retention-and-deletion), including Apple's backup controls. Nibble does not use Apple Health/HealthKit, so it has no HealthKit records to remove.
 
@@ -56,3 +56,5 @@ To intentionally erase all local Nibble information, open Settings > General > i
 The diary and retained migration records are kept in a local folder that Nibble marks excluded from future device backups. They use complete file protection on iOS. These are app-level storage settings; physical-device lock/backup behavior for the release still needs verification, and older backup copies are managed separately through iOS or your computer. If you see a storage protection error, unlock the device, check free storage, and reopen Nibble. An unreadable original is preserved; do not uninstall as a troubleshooting step unless you intend to erase your data. The app has no automatic cloud recovery if the device is lost.
 
 This release is planned as a free app with no subscriptions or in-app purchases. Nibble has no sign-up, app analytics, or app cloud sync. Barcode lookups contact Open Food Facts and expose the barcode and ordinary network information to that provider. See the [privacy policy](PRIVACY.md) for storage, third-party requests, support posts, and deletion details.
+
+Exported JSON copies are created only when you tap Export a diary copy and choose a destination in the system Files/share sheet. They may contain your diary, saved foods, preferences, and optional body profile. Manage or delete those copies wherever you saved or shared them.

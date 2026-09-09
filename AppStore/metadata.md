@@ -49,7 +49,7 @@ Explore protein, carbs, and fat in Macro Mix. See which meals contributed, previ
 YOUR KIND OF BALANCE
 Track without a target or adjust your plan whenever you need to. Optional calorie estimates use your age, height, weight, formula choice, activity, and direction. Metric and imperial units are supported.
 
-Your diary and saved foods stay on your device and remain usable offline. Nibble stores them in a dedicated app folder marked excluded from device backups and uses iOS complete file protection; it has no cloud sync. Deleting the app or losing the device can lose your diary. Barcode lookup needs internet access and sends the barcode and ordinary network information to Open Food Facts, not your saved diary or body profile. Nibble includes no analytics, advertising, subscriptions, or in-app purchases.
+Your diary and saved foods stay on your device and remain usable offline. Nibble stores them in a dedicated app folder marked excluded from device backups and uses iOS complete file protection; it has no cloud sync. You can explicitly export a JSON copy through the system Files/share sheet. Deleting the app or losing the device can lose your diary. Barcode lookup needs internet access and sends the barcode and ordinary network information to Open Food Facts, not your saved diary or body profile. Nibble includes no analytics, advertising, subscriptions, or in-app purchases.
 
 Nutrition values and targets are estimates, not medical advice or a weight-loss guarantee. Automated estimates are for adults and exclude pregnancy and breastfeeding. Check product values against the package.
 
@@ -75,6 +75,7 @@ GitHub Issues is the planned public contact channel; never invent an email addre
 The code supports these observations, but the final App Store privacy answer remains open:
 
 - `AppState.swift` stores diary, foods, preferences, and an optional profile locally in a backup-excluded folder with complete file protection on iOS. Migration preserves earlier records in a verified local recovery file before removing the three old UserDefaults values. `Models.swift` defines the saved fields. There is no HealthKit integration or developer cloud sync.
+- `ProfileView.swift` offers an explicit JSON export through Apple’s system Files/share flow. The app does not upload or sync that file unless the person chooses a destination; exported copies are outside Nibble’s control.
 - `OpenFoodFactsClient.swift` sends a barcode in an HTTPS product request, plus `Nibble/1.0 (+https://github.com/bond-is-here/nibble)` as the current User-Agent. No stored diary or profile is included. The receiving provider also sees source IP and other request information. The current User-Agent contains a public repository URL, not an owner contact email.
 - `BarcodeScannerView.swift` recognizes barcode metadata locally; it does not upload images. No analytics, ad, or third-party crash SDK appears in the source.
 - `PrivacyInfo.xcprivacy` currently declares no tracking, an empty collected-data list, and UserDefaults reason `CA92.1`. That file is evidence of the present declaration, not validation of third-party retention or the final App Store privacy label.
