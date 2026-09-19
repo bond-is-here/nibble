@@ -37,7 +37,7 @@ struct MainTabView: View {
         VStack(spacing: 0) {
             Group {
                 switch tab {
-                case 0: DashboardView(onAddFood: { addRequest = AddRequest(meal: $0) }, onScan: { addRequest = AddRequest(meal: .suggested(), scan: true) })
+                case 0: DashboardView(onAddFood: { addRequest = AddRequest(meal: $0) })
                 case 1: LogView()
                 default: ProfileView()
                 }
@@ -75,24 +75,55 @@ struct MainTabView: View {
     }
 
     private var bottomBar: some View {
-        NibbleAdaptiveStack(spacing: 8) {
-            HStack(spacing: 4) {
-            navItem(0, title: "Diary", icon: "square.grid.2x2")
-            navItem(1, title: "Patterns", icon: "chart.bar.xaxis")
-            navItem(2, title: "You", icon: "face.smiling")
+        Group {
+            if typeSize.isAccessibilitySize {
+                VStack(spacing: 12) {
+                    navigationItems
+                    foodActions
+                }
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) {
+                        navigationItems
+                        foodActions
+                    }
+                    VStack(spacing: 12) {
+                        navigationItems
+                        foodActions
+                    }
+                }
             }
-            Button { addRequest = AddRequest(meal: .suggested()) } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "plus").font(.system(size: 17, weight: .medium))
-                    Text("Add food").nibbleFont(size: 14, weight: .semibold)
-                }.foregroundStyle(Color.ink).padding(.horizontal, 20).padding(.vertical, 13)
-                    .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: 49)
-                    .background(Color.lime, in: Capsule())
-            }.buttonStyle(.plain)
         }
         .padding(.horizontal, 18).padding(.top, 14).padding(.bottom, 13)
         .background(Color.paper)
         .overlay(alignment: .top) { Color.line.frame(height: 1) }
+    }
+
+    private var navigationItems: some View {
+        HStack(spacing: 4) {
+            navItem(0, title: "Diary", icon: "square.grid.2x2")
+            navItem(1, title: "Patterns", icon: "chart.bar.xaxis")
+            navItem(2, title: "You", icon: "face.smiling")
+        }
+    }
+
+    private var foodActions: some View {
+        HStack(spacing: 8) {
+            Button { addRequest = AddRequest(meal: .suggested()) } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "plus").font(.system(size: 17, weight: .medium))
+                    Text("Add food").nibbleFont(size: 14, weight: .semibold)
+                        .fixedSize(horizontal: true, vertical: false)
+                }.foregroundStyle(Color.ink).padding(.horizontal, 16).padding(.vertical, 13)
+                    .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: 49)
+                    .background(Color.lime, in: Capsule())
+            }.buttonStyle(.plain)
+            if tab == 0 {
+                RoundButton(icon: "barcode.viewfinder", label: "Scan a food barcode") {
+                    addRequest = AddRequest(meal: .suggested(), scan: true)
+                }.accessibilityIdentifier("diary.scan")
+            }
+        }
     }
 
     private func navItem(_ value: Int, title: String, icon: String) -> some View {

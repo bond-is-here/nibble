@@ -23,6 +23,59 @@ final class NibbleUITests: XCTestCase {
         }
     }
 
+    func testEmptyDiaryCanLogBreakfastAndExploreMacros() {
+        XCTAssertTrue(app.staticTexts["diary.empty"].exists)
+        XCTAssertTrue(app.buttons["Add food"].isHittable, "The primary action stays visible on an empty day")
+        XCTAssertTrue(app.buttons["diary.scan"].isHittable, "Scanning stays available beside food logging")
+        capture("Simplified empty diary")
+
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Breakfast"])
+        tap(app.buttons["Choose Greek yogurt, 1 cup, 150 calories"])
+        XCTAssertTrue(app.buttons["Breakfast"].isSelected)
+        tap(app.buttons["portion.save"])
+        expectCalories("150")
+        XCTAssertFalse(app.staticTexts["diary.empty"].exists)
+        reveal(app.buttons["Edit Greek yogurt, 150 calories"])
+        XCTAssertTrue(app.buttons["Add food to Breakfast"].exists, "The populated meal remains directly editable")
+        capture("Simplified diary with breakfast")
+
+        tap(app.buttons["diary.macros"], towardTop: true)
+        XCTAssertTrue(app.buttons["Close macro mix"].waitForExistence(timeout: 5))
+        tap(app.buttons["Close macro mix"], towardTop: true)
+        expectCalories("150")
+    }
+
+    func testCalendarKeepsYesterdaySeparateAndReturnsToToday() {
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        let yesterdayID = diaryDayIdentifier(yesterday)
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Quick add Greek yogurt, 1 cup"])
+        expectCalories("150")
+
+        tap(app.buttons["diary.date"])
+        tap(app.buttons[yesterdayID])
+        tap(app.buttons["Open yesterday"])
+        expectCalories("0")
+        XCTAssertTrue(app.staticTexts["diary.empty"].exists)
+        XCTAssertTrue(app.buttons["diary.today"].exists)
+        tap(app.buttons["Add food"])
+        tap(app.buttons["Choose Greek yogurt, 1 cup, 150 calories"])
+        tap(app.buttons["2 servings"])
+        tap(app.buttons["portion.save"])
+        expectCalories("300")
+        capture("Yesterday has its own diary")
+
+        tap(app.buttons["diary.today"])
+        expectCalories("150")
+        XCTAssertFalse(app.buttons["diary.today"].exists)
+        tap(app.buttons["diary.date"])
+        tap(app.buttons[yesterdayID])
+        tap(app.buttons["Open yesterday"])
+        expectCalories("300")
+        XCTAssertTrue(app.buttons["Edit Greek yogurt, 300 calories"].exists)
+    }
+
     func testQuickLoggingPersistsAndCanBeDeletedAndUndone() {
         tap(app.buttons["Add food"])
         tap(app.buttons["Quick add Greek yogurt, 1 cup"])
@@ -281,6 +334,15 @@ final class NibbleUITests: XCTestCase {
         expectCalories("100")
         relaunch()
         expectCalories("100")
+    }
+
+    private func diaryDayIdentifier(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return "diary.day.\(formatter.string(from: date))"
     }
 
     private func launchWithBarcodeFixture(_ fixture: String) {
