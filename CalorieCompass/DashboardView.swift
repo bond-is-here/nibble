@@ -2,214 +2,164 @@ import SwiftUI
 
 struct DashboardView: View {
     @EnvironmentObject private var appState: AppState
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     let onAddFood: (Meal) -> Void
-    let onScan: () -> Void
     @State private var showCalendar = false
+    @State private var calendarDate = Date()
     @State private var editingEntry: FoodLogEntry?
-    @State private var selectedFood: FoodItem?
-    @State private var mascotTilt = false
     @State private var macroFocus: MacroKind?
     private var totals: DailyTotals { appState.selectedTotals }
     private var target: Double? { appState.targets?.calories }
+    private var isToday: Bool { Calendar.current.isDateInToday(appState.selectedDate) }
+    private var loggedMeals: [Meal] {
+        Meal.allCases.filter { meal in appState.selectedEntries.contains { $0.meal == meal } }
+    }
     private var week: [Date] {
         (0..<7).reversed().compactMap { Calendar.current.date(byAdding: .day, value: -$0, to: Date()) }
     }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 23) {
+            VStack(alignment: .leading, spacing: 24) {
                 header
-                dates
-                calorieCard
-                MacroMixCard(snapshot: MacroSnapshot(entries: appState.selectedEntries, targets: appState.targets)) { macroFocus = $0 }
-                usuals
-                diary
-                HStack {
-                    Spacer()
-                    Text("A little awareness. A lot of living.").nibbleFont(size: 11).foregroundStyle(Color.muted)
-                    Spacer()
-                }.padding(.vertical, 8)
-            }.padding(.horizontal, 23).padding(.top, 16).padding(.bottom, 20)
+                dailySummary
+                if appState.selectedEntries.isEmpty { emptyDiary } else { diary }
+            }.padding(.horizontal, 23).padding(.top, 20).padding(.bottom, 24)
         }
-        .sheet(isPresented: $showCalendar) {
-            VStack(spacing: 22) {
-                HStack {
-                    Text("Pick a day").nibbleFont(size: 26, weight: .bold, design: .rounded)
-                    Spacer()
-                    RoundButton(icon: "xmark", label: "Close calendar") { showCalendar = false }
-                }
-                DatePicker("Diary date", selection: $appState.selectedDate, in: ...Date(), displayedComponents: .date)
-                    .datePickerStyle(.graphical)
-                NibbleButton(title: "Open \(appState.selectedDate.diaryTitle.lowercased())") { showCalendar = false }
-            }.padding(24).background(Color.canvas).phoneSheet()
-        }
+        .sheet(isPresented: $showCalendar) { calendarSheet }
         .sheet(item: $editingEntry) { entry in
             FoodPortionView(food: entry.food, initialMeal: entry.meal, entry: entry).phoneSheet()
-        }
-        .sheet(item: $selectedFood) { food in
-            FoodPortionView(food: food, initialMeal: .suggested()).phoneSheet()
         }
         .sheet(item: $macroFocus) { macro in MacroMixView(initialFocus: macro).phoneSheet() }
     }
 
     private var header: some View {
-        HStack(alignment: .center) {
-            HStack(spacing: 3) {
-                Text("nibble").nibbleFont(size: 34, weight: .black, design: .rounded).tracking(-2.2)
-                Circle().fill(Color.limeDark).frame(width: 7, height: 7).offset(y: 9)
-            }.foregroundStyle(Color.ink).accessibilityLabel("Nibble")
-            Spacer()
-            if appState.isPreview {
-                Text("DEMO").nibbleFont(size: 8, weight: .bold, design: .monospaced).tracking(1)
-                    .padding(.horizontal, 8).padding(.vertical, 5).background(Color.fog, in: Capsule())
-            }
-            RoundButton(icon: "barcode.viewfinder", label: "Scan a food barcode", fill: .white, action: onScan)
-        }
-    }
-
-    private var dates: some View {
-        VStack(spacing: 13) {
-            HStack {
-                Button { showCalendar = true } label: {
-                    HStack(spacing: 7) {
-                        Text(appState.selectedDate.diaryTitle).nibbleFont(size: 14, weight: .semibold)
-                        Image(systemName: "chevron.down").nibbleFont(size: 9, weight: .bold)
-                    }.foregroundStyle(Color.ink)
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Button {
+                    calendarDate = appState.selectedDate
+                    showCalendar = true
+                } label: {
+                    HStack(spacing: 9) {
+                        Text(appState.selectedDate.diaryTitle)
+                            .nibbleFont(size: 30, weight: .bold, design: .rounded).tracking(-1)
+                        Image(systemName: "chevron.down").nibbleFont(size: 12, weight: .semibold)
+                    }.frame(minHeight: 44).contentShape(Rectangle())
                 }.buttonStyle(.plain)
-                Spacer()
-                Text(appState.selectedDate.formatted(.dateTime.month(.wide).year()).uppercased())
-                    .nibbleFont(size: 9, weight: .medium, design: .monospaced).tracking(1.3).foregroundStyle(Color.muted)
-            }
-            ScrollView(.horizontal, showsIndicators: false) { HStack(spacing: 4) {
-                ForEach(week, id: \.self) { date in
-                    let selected = Calendar.current.isDate(date, inSameDayAs: appState.selectedDate)
-                    Button { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { appState.selectedDate = date } } label: {
-                        VStack(spacing: 7) {
-                            Text(String(date.shortDay.prefix(1))).nibbleFont(size: 10, weight: .medium)
-                                .foregroundStyle(selected ? Color.ink : Color.muted)
-                            Text(date.formatted(.dateTime.day())).nibbleFont(size: 13, weight: .semibold)
-                            Circle().fill(!appState.entries(on: date).isEmpty ? Color.ink : Color.clear).frame(width: 3, height: 3)
-                        }.frame(minWidth: 44).padding(.vertical, 9)
-                            .foregroundStyle(Color.ink)
-                            .background(selected ? Color.lime : Color.clear, in: Capsule())
-                            .contentShape(Capsule())
-                    }.buttonStyle(.plain)
-                        .accessibilityLabel(date.formatted(date: .complete, time: .omitted))
-                        .accessibilityAddTraits(selected ? .isSelected : [])
+                    .accessibilityIdentifier("diary.date")
+                    .accessibilityLabel("Choose diary date, \(appState.selectedDate.formatted(date: .complete, time: .omitted))")
+                if isToday {
+                    Text(appState.selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
+                        .nibbleFont(size: 12).foregroundStyle(Color.muted)
+                } else {
+                    Text(appState.selectedDate.formatted(.dateTime.month(.abbreviated).day().year()))
+                        .nibbleFont(size: 12).foregroundStyle(Color.muted)
+                    Button("Back to today") { appState.selectedDate = Date() }
+                        .nibbleFont(size: 13, weight: .semibold).buttonStyle(.plain)
+                        .frame(minHeight: 44).accessibilityIdentifier("diary.today")
                 }
-            }}.defaultScrollAnchor(.trailing)
-        }
+            }.frame(maxWidth: .infinity, alignment: .leading)
+            if !typeSize.isAccessibilitySize {
+                HStack(spacing: 8) {
+                    if appState.isPreview {
+                        Text("DEMO").nibbleFont(size: 8, weight: .bold, design: .monospaced)
+                            .padding(6).background(Color.fog, in: Capsule())
+                    }
+                    Text("nibble.").nibbleFont(size: 22, weight: .black, design: .rounded).tracking(-1)
+                        .foregroundStyle(Color.limeDark).accessibilityLabel("Nibble")
+                }
+            }
+        }.foregroundStyle(Color.ink)
     }
 
-    private var calorieCard: some View {
+    private var dailySummary: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack {
-                Eyebrow(text: "Your daily bite", color: .ink)
-                Spacer()
-                Image(systemName: "sparkle").nibbleFont(size: 20).foregroundStyle(Color.ink).accessibilityHidden(true)
-            }
-            HStack(alignment: .center, spacing: 0) {
-                VStack(alignment: .leading, spacing: 1) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(totals.calories.whole)
                         .accessibilityIdentifier("diary.calories")
-                        .nibbleFont(size: 62, weight: .medium, design: .rounded).tracking(-4)
+                        .nibbleFont(size: 52, weight: .medium, design: .rounded).tracking(-2)
                         .lineLimit(1).minimumScaleFactor(0.7).contentTransition(.numericText())
-                    Text("calories enjoyed").nibbleFont(size: 13, weight: .medium).foregroundStyle(Color.ink)
+                    Text("calories logged").nibbleFont(size: 13).foregroundStyle(Color.muted)
                 }
-                Spacer(minLength: 8)
-                if !typeSize.isAccessibilitySize { NibbleMascot(color: .white.opacity(0.8), cheerful: !appState.selectedEntries.isEmpty)
-                    .frame(width: 112, height: 112)
-                    .rotationEffect(.degrees(mascotTilt ? 8 : -7))
-                    .onTapGesture {
-                        guard !reduceMotion else { return }
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.35)) { mascotTilt.toggle() }
-                        NibbleHaptics.tap()
-                    } }
+                Spacer(minLength: 0)
+                if !typeSize.isAccessibilitySize {
+                    NibbleMascot(color: .lime, cheerful: true)
+                        .frame(width: 68, height: 68).rotationEffect(.degrees(-8))
+                }
             }
             if let target {
-                GeometryReader { g in
-                    Capsule().fill(Color.ink.opacity(0.1))
-                    Capsule().fill(Color.ink).frame(width: g.size.width * min(totals.calories / max(target, 1), 1))
-                }.frame(height: 7).accessibilityHidden(true)
-                NibbleAdaptiveStack(spacing: 8) {
-                    HStack(spacing: 4) {
-                        Text(abs(target - totals.calories).whole).nibbleFont(size: 16, weight: .bold, design: .rounded)
-                        Text(totals.calories <= target ? "left today" : "above target").nibbleFont(size: 12)
+                VStack(alignment: .leading, spacing: 10) {
+                    GeometryReader { g in
+                        Capsule().fill(Color.fog)
+                        Capsule().fill(Color.limeDark)
+                            .frame(width: g.size.width * min(totals.calories / max(target, 1), 1))
+                    }.frame(height: 5).accessibilityHidden(true)
+                    NibbleAdaptiveStack(spacing: 6) {
+                        Text("\(abs(target - totals.calories).whole) \(totals.calories <= target ? "to target" : "above target")")
+                            .nibbleFont(size: 12, weight: .medium).frame(maxWidth: .infinity, alignment: .leading)
+                        Text("\(target.whole)\(isToday ? " daily target" : " current target")")
+                            .nibbleFont(size: 12).foregroundStyle(Color.muted)
                     }
-                    Text("\(target.whole) goal").nibbleFont(size: 12).foregroundStyle(Color.ink)
                 }
             } else {
-                Text("Just noticing. No target needed.").nibbleFont(size: 13, weight: .medium)
-                    .padding(.top, 5)
+                Text("No target. Just a little awareness.").nibbleFont(size: 12).foregroundStyle(Color.muted)
             }
-        }
-        .foregroundStyle(Color.ink)
-        .padding(23).background(Color.lime, in: RoundedRectangle(cornerRadius: 30))
+            Rectangle().fill(Color.line).frame(height: 1).accessibilityHidden(true)
+            Button { macroFocus = .protein } label: {
+                HStack(spacing: 10) {
+                    HStack(spacing: 3) {
+                        ForEach(MacroKind.allCases) { macro in
+                            Capsule().fill(macro.color).frame(width: 5, height: 18)
+                        }
+                    }.accessibilityHidden(true)
+                    Text("Macro Mix").nibbleFont(size: 13, weight: .semibold)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right").nibbleFont(size: 11, weight: .semibold)
+                }.frame(minHeight: 44).contentShape(Rectangle())
+            }.buttonStyle(.plain).accessibilityLabel("Explore your macro mix")
+                .accessibilityHint("Protein, carbs, fat, and nutrition details for this day")
+                .accessibilityIdentifier("diary.macros")
+        }.foregroundStyle(Color.ink).padding(22)
+            .background(Color.paper, in: RoundedRectangle(cornerRadius: 26))
     }
 
-    private var usuals: some View {
-        VStack(alignment: .leading, spacing: 13) {
-            SectionHeading(title: appState.recentFoods.isEmpty ? "Easy first bites" : "Your usuals", detail: "one tap, one serving")
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(appState.quickFoods, id: \.stableKey) { food in
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Button { selectedFood = food } label: {
-                                    Text(food.emoji).font(.system(size: 27)).frame(minWidth: 44, minHeight: 44)
-                                }.buttonStyle(.plain).accessibilityLabel("Adjust \(food.name) portion")
-                                Spacer()
-                                Button {
-                                    if appState.addEntry(food: food, meal: .suggested(), servings: 1) { NibbleHaptics.tap() }
-                                } label: {
-                                    Image(systemName: "plus").nibbleFont(size: 12, weight: .semibold)
-                                        .frame(width: 44, height: 44).background(Color.canvas, in: Circle())
-                                }.buttonStyle(.plain).accessibilityLabel("Log \(food.name), \(food.servingText)")
-                            }
-                            Button { selectedFood = food } label: {
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(food.name).nibbleFont(size: 12, weight: .semibold)
-                                    Text("\(food.calories.whole) cal · \(food.servingText)").nibbleFont(size: 9).foregroundStyle(Color.muted)
-                                }.frame(maxWidth: .infinity, alignment: .leading)
-                            }.buttonStyle(.plain)
-                        }.foregroundStyle(Color.ink).padding(13).frame(width: typeSize.isAccessibilitySize ? 260 : 150)
-                            .background(Color.white, in: RoundedRectangle(cornerRadius: 20))
-                    }
-                }
-            }
-        }
+    private var emptyDiary: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(isToday ? "Room for your first bite." : "No food logged this day.")
+                .nibbleFont(size: 23, weight: .semibold, design: .rounded).tracking(-0.5)
+                .accessibilityIdentifier("diary.empty")
+            Text(isToday ? "Tap Add food below. Start with whatever you had." : "Use Add food to fill in this day, or come back to today.")
+                .nibbleFont(size: 14).foregroundStyle(Color.muted).lineSpacing(3)
+        }.fixedSize(horizontal: false, vertical: true).foregroundStyle(Color.ink).padding(.vertical, 12)
     }
 
     private var diary: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            SectionHeading(title: "On your plate", detail: "\(appState.selectedEntries.count) bites logged")
-            ForEach(Meal.allCases) { meal in
+        VStack(alignment: .leading, spacing: 16) {
+            SectionHeading(title: "Your food", detail: "\(appState.selectedEntries.count) \(appState.selectedEntries.count == 1 ? "entry" : "entries")")
+            ForEach(loggedMeals) { meal in
                 let entries = appState.selectedEntries.filter { $0.meal == meal }
-                VStack(spacing: 0) {
-                    HStack {
-                        Image(systemName: meal.icon).nibbleFont(size: 14, weight: .medium).frame(width: 20)
-                        Text(meal.title).nibbleFont(size: 14, weight: .semibold)
-                        Spacer()
-                        if !entries.isEmpty {
-                            Text(entries.reduce(0) { $0 + $1.calories }.whole + " cal").nibbleFont(size: 11).foregroundStyle(Color.muted)
-                        }
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: 8) {
+                        Image(systemName: meal.icon).nibbleFont(size: 13).accessibilityHidden(true)
+                        Text(meal.title).nibbleFont(size: 14, weight: .semibold).accessibilityAddTraits(.isHeader)
+                        Spacer(minLength: 0)
                         Button { onAddFood(meal) } label: {
-                            Image(systemName: "plus").font(.system(size: 14, weight: .medium)).frame(width: 44, height: 44)
+                            Image(systemName: "plus").font(.system(size: 14, weight: .medium))
+                                .frame(width: 44, height: 44).contentShape(Rectangle())
                         }.buttonStyle(.plain).accessibilityLabel("Add food to \(meal.title)")
-                    }
+                    }.foregroundStyle(Color.muted)
                     ForEach(entries) { entry in
-                        HStack(spacing: 11) {
+                        HStack(spacing: 4) {
                             Button { editingEntry = entry } label: {
-                                NibbleAdaptiveStack(spacing: 11) {
-                                    if !typeSize.isAccessibilitySize { FoodBadge(food: entry.food, size: 39) }
+                                NibbleAdaptiveStack(spacing: 12) {
+                                    if !typeSize.isAccessibilitySize { FoodBadge(food: entry.food, size: 36) }
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text(entry.food.name).nibbleFont(size: 13, weight: .medium)
-                                        Text(entry.portionDescription).nibbleFont(size: 10).foregroundStyle(Color.muted)
-                                    }
-                                    Text(entry.calories.whole).nibbleFont(size: 13, weight: .semibold, design: .rounded)
-                                }.contentShape(Rectangle())
+                                        Text(entry.food.name).nibbleFont(size: 14, weight: .medium)
+                                        Text(entry.portionDescription).nibbleFont(size: 11).foregroundStyle(Color.muted)
+                                    }.frame(maxWidth: .infinity, alignment: .leading)
+                                    Text(entry.calories.whole).nibbleFont(size: 14, weight: .semibold, design: .rounded)
+                                }.frame(maxWidth: .infinity, minHeight: 44).contentShape(Rectangle())
                             }.buttonStyle(.plain).accessibilityLabel("Edit \(entry.food.name), \(entry.calories.whole) calories")
                             Menu {
                                 Button("Edit portion", systemImage: "pencil") { editingEntry = entry }
@@ -222,15 +172,56 @@ struct DashboardView: View {
                             }.menuStyle(.borderlessButton).fixedSize().accessibilityLabel("Options for \(entry.food.name)")
                         }.padding(.vertical, 10)
                     }
-                    if entries.isEmpty {
-                        Button { onAddFood(meal) } label: {
-                            Text("Add a little something").nibbleFont(size: 12).foregroundStyle(Color.muted)
-                                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading).padding(.bottom, 10).padding(.top, 3)
-                        }.buttonStyle(.plain)
-                    }
-                }.foregroundStyle(Color.ink).padding(.horizontal, 16).padding(.vertical, 5)
-                    .background(Color.white, in: RoundedRectangle(cornerRadius: 22))
+                }.padding(.horizontal, 14).padding(.bottom, 6)
+                    .background(Color.paper, in: RoundedRectangle(cornerRadius: 20))
             }
-        }
+        }.foregroundStyle(Color.ink)
+    }
+
+    private var calendarSheet: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                HStack {
+                    Text("Pick a day").nibbleFont(size: 26, weight: .bold, design: .rounded)
+                    Spacer()
+                    RoundButton(icon: "xmark", label: "Close calendar") { showCalendar = false }
+                }
+                Text("Recent days").nibbleFont(size: 13, weight: .semibold)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(week, id: \.self) { date in
+                            let selected = Calendar.current.isDate(date, inSameDayAs: calendarDate)
+                            Button { calendarDate = date } label: {
+                                VStack(spacing: 8) {
+                                    Text(date.shortDay).nibbleFont(size: 11)
+                                    Text(date.formatted(.dateTime.day())).nibbleFont(size: 14, weight: .semibold)
+                                    Circle().fill(appState.entries(on: date).isEmpty ? Color.clear : Color.ink).frame(width: 4, height: 4)
+                                }.frame(minWidth: 44).padding(8)
+                                    .background(selected ? Color.lime : Color.fog, in: RoundedRectangle(cornerRadius: 16))
+                            }.buttonStyle(.plain)
+                                .accessibilityLabel(date.formatted(date: .complete, time: .omitted))
+                                .accessibilityValue(appState.entries(on: date).isEmpty ? "No entries" : "Food logged")
+                                .accessibilityAddTraits(selected ? .isSelected : [])
+                                .accessibilityIdentifier("diary.day.\(dayIdentifier(date))")
+                        }
+                    }
+                }.defaultScrollAnchor(.trailing)
+                DatePicker("Diary date", selection: $calendarDate, in: ...Date(), displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+            }.padding(24)
+        }.safeAreaInset(edge: .bottom) {
+            NibbleButton(title: "Open \(calendarDate.diaryTitle.lowercased())") {
+                appState.selectedDate = calendarDate
+                showCalendar = false
+            }.padding(24).background(Color.canvas)
+        }.foregroundStyle(Color.ink).background(Color.canvas).phoneSheet()
+    }
+
+    private func dayIdentifier(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
     }
 }
