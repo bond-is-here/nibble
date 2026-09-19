@@ -7,17 +7,18 @@
 ## The experience
 
 - **Start immediately.** Track without a target, bring an existing target, or estimate one using age, height, weight, activity, and direction. Metric and imperial units are supported.
-- **Your usuals, one tap away.** Quick-add a serving, revisit recent foods, or star your favorites.
+- **A calmer first page.** See the day's calorie total and logged meals at a glance. Add food and barcode scanning stay within reach; an empty day has one simple invitation to begin.
+- **Your usuals, close at hand.** Open Add food to quick-add a serving, revisit recent foods, or star your favorites.
 - **Scan the package.** Camera scanning and typed GTIN barcodes use Open Food Facts, with gram/milliliter portions, explicit errors, and manual label entry when data is incomplete.
 - **Make a food.** Save your own label or recipe estimate. Calories alone are enough; unknown macros stay visibly incomplete.
 - **Fix a little slip.** Edit portions and meals, delete entries through their menu, or undo your last diary change.
-- **See the bigger picture.** A date picker and seven-day strip open past diary days; Patterns shows logged days and an average that excludes missing days.
-- **Meet Macro Mix.** Three orbit rings track protein, carbs, and fat. Tap a macro to explore meal breakdowns and its biggest food contributors. Without a target, the rings show the share of known macro energy.
+- **See the bigger picture.** Tap the diary date to open a calendar with recent-day shortcuts. A Back to today action keeps past days easy to leave; Patterns shows logged days and an average that excludes missing days.
+- **Meet Macro Mix.** A compact link below the calorie total opens three orbit rings for protein, carbs, and fat. Tap a macro to explore meal breakdowns and its biggest food contributors. Without a target, the rings show the share of known macro energy.
 - **Try a bite before logging.** Portion changes preview the day's before/after macro grams; editing replaces the original portion instead of double-counting it.
 - **A little on-device intelligence.** “Next little bite” ranks foods with complete macro data from your library against the largest proportional target gap, penalizes overshoot, and uses favorites to break ties. It never auto-logs or infers unknown macros. Suggestions pause for missing data, past days, absent targets, and reached calorie/all-macro targets. Ingredients, allergies, and dietary restrictions are not evaluated.
 - **Your own mixing desk.** Save a custom protein/carbs/fat energy split that adds to 100%. It scales with your calorie target and can be reset to 25/45/30. Changing the plan leaves logged nutrition untouched.
 - **Seven days, three colors.** Weekly bars show known macro energy proportions. Known-gram daily averages exclude days with no macro data; incomplete days are marked, not treated as complete.
-- **A little personality.** An original SwiftUI bite mascot, lime/lilac/peach palette, oversized calorie card, custom icon, and a springy mascot interaction with reduced-motion support.
+- **A little personality.** An original SwiftUI bite mascot, lime/lilac/peach palette, quiet calorie summary, and custom icon. The diary keeps its mascot small and decorative, with the same friendly expression on empty and logged days.
 
 Search covers the starter library and your saved foods. Barcode lookup accesses the external product database. Generic meals are labeled as estimates.
 

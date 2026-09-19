@@ -2,14 +2,40 @@ import SwiftUI
 import AppKit
 
 // Renders the actual shared SwiftUI views. This is not an iOS Simulator screenshot.
+// Compact and accessibility-size previews use macOS text metrics; verify iPhone
+// clipping, scrolling, and touch targets separately in the iOS UI journeys.
 @main
 struct RenderPreview {
-    @MainActor static func main() throws {
+    @MainActor static func main() async throws {
         _ = NSApplication.shared
         let output = URL(fileURLWithPath: CommandLine.arguments.dropFirst().first ?? "Design")
         try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
         let demo = AppState(demo: true)
         try render(PhoneFrame { MainTabView().environmentObject(demo) }, name: "nibble-diary", output: output)
+        let compactSize = NSSize(width: 375, height: 667)
+        try render(PhoneFrame(width: compactSize.width, height: compactSize.height) {
+            MainTabView().environmentObject(demo)
+        }, name: "nibble-compact-diary", output: output, size: compactSize)
+        try render(PhoneFrame(width: compactSize.width, height: compactSize.height) {
+            MainTabView().environmentObject(demo).dynamicTypeSize(.accessibility5)
+        }, name: "nibble-compact-large-text-diary", output: output, size: compactSize)
+
+        let historical = AppState(demo: true)
+        historical.selectedDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
+        try render(PhoneFrame { MainTabView().environmentObject(historical) }, name: "nibble-historical-empty-diary", output: output)
+
+        let aboveTarget = AppState(demo: true)
+        aboveTarget.startTracking(target: 1000)
+        try render(PhoneFrame { MainTabView().environmentObject(aboveTarget) }, name: "nibble-above-target-diary", output: output)
+
+        let empty = AppState(demo: true)
+        for entry in empty.entries { empty.deleteEntry(entry) }
+        empty.startTracking()
+        // Use the normal in-memory demo APIs, then let their transient deletion
+        // toast expire before capturing a complete, settled MainTabView.
+        while empty.toast != nil { try await Task.sleep(nanoseconds: 100_000_000) }
+        try render(PhoneFrame { MainTabView().environmentObject(empty) }, name: "nibble-empty-diary", output: output)
+
         try render(PhoneFrame { AddFoodView(initialMeal: .lunch).environmentObject(demo) }, name: "nibble-add-food", output: output)
         try render(PhoneFrame { OnboardingView().environmentObject(demo) }, name: "nibble-welcome", output: output)
         try render(PhoneFrame { FoodPortionView(food: AppState.foodDatabase[3], initialMeal: .lunch).environmentObject(demo) }, name: "nibble-portion", output: output)
@@ -97,6 +123,8 @@ private struct DesignBoard: View {
 }
 
 private struct PhoneFrame<Content: View>: View {
+    var width: CGFloat = 430
+    var height: CGFloat = 932
     @ViewBuilder var content: () -> Content
     var body: some View {
         VStack(spacing: 0) {
@@ -111,6 +139,6 @@ private struct PhoneFrame<Content: View>: View {
             }.padding(.horizontal, 31).frame(height: 47).foregroundStyle(Color.ink)
             content().frame(maxWidth: .infinity, maxHeight: .infinity)
             Capsule().fill(Color.ink).frame(width: 130, height: 5).padding(.vertical, 9)
-        }.frame(width: 430, height: 932).background(Color.canvas)
+        }.frame(width: width, height: height).background(Color.canvas)
     }
 }
