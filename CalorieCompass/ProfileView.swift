@@ -1,9 +1,13 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ProfileView: View {
     @EnvironmentObject private var appState: AppState
     @State private var showEdit = false
     @State private var showMacroEditor = false
+    @State private var showExporter = false
+    @State private var exportDocument: NibbleDiaryDocument?
+    @State private var exportError: String?
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
@@ -69,6 +73,20 @@ struct ProfileView: View {
                         .nibbleFont(size: 13, weight: .medium)
                     Link("Help & support ↗", destination: URL(string: "https://github.com/bond-is-here/nibble/blob/main/SUPPORT.md")!)
                         .nibbleFont(size: 13, weight: .medium)
+                    Button(action: prepareExport) {
+                        Label("Export a diary copy", systemImage: "square.and.arrow.up")
+                            .nibbleFont(size: 13, weight: .semibold)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("diary.export")
+                    .accessibilityHint("Save or share a JSON copy of your local diary")
+                    Text("Save or share a readable JSON copy using the system Files sheet. Nibble does not send it anywhere unless you choose a destination.")
+                        .nibbleFont(size: 11).foregroundStyle(Color.muted).lineSpacing(3)
+                    if let exportError {
+                        InlineMessage(text: exportError)
+                    }
                     DisclosureGroup("About targets & food data") {
                         VStack(alignment: .leading, spacing: 13) {
                             Text("Estimated targets use Mifflin–St Jeor resting energy × your activity level. Losing slowly subtracts up to 300 calories (at most 15%); gaining adds 250. Automated estimates have a 1,500-calorie floor. This is a product guardrail, not a personal medical minimum.")
@@ -89,6 +107,23 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showEdit) { OnboardingView(isEditing: true).phoneSheet() }
         .sheet(isPresented: $showMacroEditor) { MacroSplitEditor().phoneSheet() }
+        .fileExporter(isPresented: $showExporter, document: exportDocument, contentType: .json,
+                      defaultFilename: "Nibble-diary-export") { result in
+            if case .failure = result {
+                exportError = "Your diary copy couldn’t be exported. Try again or choose another destination."
+            }
+            exportDocument = nil
+        }
+    }
+
+    private func prepareExport() {
+        exportError = nil
+        do {
+            exportDocument = NibbleDiaryDocument(data: try appState.exportData())
+            showExporter = true
+        } catch {
+            exportError = "Your diary copy couldn’t be prepared. Try again."
+        }
     }
 
     private func planMacro(_ title: String, value: Double) -> some View {
@@ -103,5 +138,26 @@ struct ProfileView: View {
             Text(value).nibbleFont(size: 17, weight: .semibold, design: .rounded)
             Text(title).nibbleFont(size: 11).foregroundStyle(Color.muted)
         }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct NibbleDiaryDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.json] }
+
+    let data: Data
+
+    init(data: Data) {
+        self.data = data
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        self.data = data
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
     }
 }

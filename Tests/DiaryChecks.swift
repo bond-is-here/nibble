@@ -19,6 +19,7 @@ struct DiaryChecks {
     static func main() {
         run("fresh install and tracking without a target", noTargetChecks)
         run("manual target, estimate, and plan changes", targetChecks)
+        run("diary export is an explicit portable snapshot", exportChecks)
         run("nutrition reference values and macro energy", engineChecks)
         run("portion multiplication and units", portionChecks)
         run("add and undo", addUndoChecks)
@@ -177,6 +178,28 @@ struct DiaryChecks {
             try expect(state.targets == nil && state.profile == nil && state.entries == entries,
                        "Just tracking clears targets and retains the diary")
             try expectPersisted(state, fixture)
+        }
+    }
+
+    private static func exportChecks() throws {
+        try withFixture { fixture in
+            let state = fixture.state()
+            let date = try historicalDate(daysAgo: 1)
+            try expect(state.startTracking(profile: profile(), target: 2_100, units: .metric), "Start export fixture")
+            let item = food("Export snack", serving: "1 bowl", source: .custom)
+            try expect(state.addEntry(food: item, meal: .snack, servings: 1.5, date: date), "Add export fixture")
+
+            let exported = try state.exportData()
+            let decoded = try JSONDecoder().decode(DiaryArchive.self, from: exported)
+            try expect(decoded == state.archive, "Export must represent the exact current archive")
+            let json = String(decoding: exported, as: UTF8.self)
+            try expect(json.contains("\"profile\"") && json.contains("\"entries\""),
+                       "Export must include profile and diary records")
+
+            try expect(state.addEntry(food: food("Later snack"), meal: .lunch, servings: 1), "Mutate after export")
+            let exportedArchive = try JSONDecoder().decode(DiaryArchive.self, from: exported)
+            try expect(exportedArchive.entries.count == 1 && state.entries.count == 2,
+                       "Export must remain an immutable snapshot after later changes")
         }
     }
 
@@ -661,6 +684,7 @@ struct DiaryChecks {
             try expect(state.archive == DiaryArchive() && state.toast == nil && !state.canUndo,
                        "Blocked corrupt-file writes must not report success or mutate state")
             try expect(state.storageError == error, "Preserve the actionable read error")
+            try expect((try? state.exportData()) == nil, "Unreadable archive must not export an empty replacement")
             try expect(fixture.state().storageError != nil, "Relaunch still detects the preserved file")
         }
     }
